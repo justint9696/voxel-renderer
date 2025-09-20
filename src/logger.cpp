@@ -1,6 +1,5 @@
 #include "logger.hpp"
 
-#include <cassert>
 #include <ctime>
 #include <iostream>
 
