@@ -6,6 +6,9 @@ set(CMAKE_CXX_STANDARD 20)
 add_executable(game
     src/main.cpp
     src/logger.cpp
+    src/renderer/shader.cpp
+    src/renderer/renderer.cpp
+    src/renderer/window.cpp
 )
 
 add_library(glad STATIC lib/glad/src/glad.c)
@@ -24,4 +27,5 @@ target_include_directories(game PRIVATE
     lib/glfw/include
     lib/glm/include
     lib/stb
+    src
 )
