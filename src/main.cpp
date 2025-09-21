@@ -9,9 +9,9 @@
 #include <cstring>
 
 static float vertices[] = {
-    -0.5f, -0.5f, 0.0f,
-    +0.5f, -0.5f, 0.0f,
-    +0.0f, +0.5f, 0.0f,
+    -0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
+    +0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+    +0.0f, +0.5f, 0.0f, 0.5f, 1.0f,
 };
 
 struct State {
@@ -39,14 +39,22 @@ int main(int argc, char *argv[]) {
     glBindBuffer(GL_ARRAY_BUFFER, g_state.vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
+                          (void *)0);
     glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
+                          (void *)(sizeof(float) * 3));
+    glEnableVertexAttribArray(1);
 
     renderer::shader::create(
             "default",
             "shaders/default.frag.glsl",
             "shaders/default.vert.glsl");
     renderer::shader::use("default");
+
+    renderer::texture::create("default", "assets/brick.jpg");
+    renderer::texture::bind("default");
 
     const Window& window = renderer::get_window();
     Shader& shader = renderer::shader::get("default");

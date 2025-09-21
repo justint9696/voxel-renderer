@@ -1,4 +1,5 @@
 #include "renderer/renderer.hpp"
+#include "renderer/texture.hpp"
 #include "logger.hpp"
 
 #include <map>
@@ -8,6 +9,7 @@ namespace renderer {
         public:
             Window window;
             std::map<std::string, Shader> shaders;
+            std::map<std::string, Texture> textures;
 
         public:
             Renderer() = default;
@@ -17,7 +19,7 @@ namespace renderer {
                 window(viewport, title) {}
     };
 
-    Renderer g_renderer;
+    static Renderer g_renderer;
 
     void init(glm::vec2 viewport, const std::string& title) {
         glfwInit();
@@ -59,6 +61,21 @@ namespace renderer {
 
         Shader& get(const std::string& name) {
             return g_renderer.shaders.at(name);
+        }
+    }
+
+    namespace texture {
+        void create(const std::string& name, const std::string& fpath) {
+            g_renderer.textures.insert(
+                    std::make_pair(name, Texture(fpath)));
+        }
+
+        void destroy(const std::string& name) {
+            g_renderer.textures.erase(name);
+        }
+
+        void bind(const std::string& name) {
+            g_renderer.textures.at(name).bind();
         }
     }
 }

@@ -17,4 +17,10 @@ namespace renderer {
         void use(const std::string& name);
         Shader& get(const std::string& name);
     }
+
+    namespace texture {
+        void create(const std::string& name, const std::string& fpath);
+        void destroy(const std::string& name);
+        void bind(const std::string& name);
+    }
 }
