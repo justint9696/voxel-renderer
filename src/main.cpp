@@ -1,12 +1,12 @@
 #include "renderer/shader.hpp"
 #include "renderer/renderer.hpp"
+#include "game/input.hpp"
 #include "time.hpp"
 #include "logger.hpp"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-#include <cstring>
 
 static float vertices[] = {
     -0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
@@ -15,11 +15,12 @@ static float vertices[] = {
 };
 
 struct State {
+    bool wireframe = false;
     time_t now;
-    time_t last_second;
-    time_t last_tick;
-    uint32_t fps;
-    uint32_t tps;
+    time_t last_second = 0;
+    time_t last_tick = 0;
+    uint32_t fps = 0;
+    uint32_t tps = 0;
     uint32_t vao;
     uint32_t vbo;
 };
@@ -29,7 +30,6 @@ static State g_state;
 int main(int argc, char *argv[]) {
     lg::set_file("output.log");
 
-    memset(&g_state, 0, sizeof(g_state));
     renderer::init(glm::vec2(640, 480), "Game");
 
     glGenVertexArrays(1, &g_state.vao);
@@ -62,12 +62,17 @@ int main(int argc, char *argv[]) {
     g_state.now = util::time::now();
     g_state.last_second = g_state.now;
     g_state.last_tick = g_state.now;
-    g_state.last_tick = g_state.now;
 
     while (window.is_open()) {
-        if (glfwGetKey(window.handle, GLFW_KEY_Q) == GLFW_PRESS) {
+        if (input::key_pressed(GLFW_KEY_Q)) {
             window.close();
             break;
+        }
+
+        if (input::key_pressed(GLFW_KEY_T)) {
+            g_state.wireframe ^= 1;
+            glPolygonMode(GL_FRONT_AND_BACK,
+                          ((g_state.wireframe) ? GL_LINE : GL_FILL));
         }
 
         g_state.now = util::time::now();
@@ -89,6 +94,7 @@ int main(int argc, char *argv[]) {
         float a = fabs(sin(glfwGetTime()));
         float b = fabs(1 - sin(glfwGetTime()));
         float c = fabs(cos(glfwGetTime()));
+
         shader.set<glm::vec4>("u_color", glm::vec4(a, b, c, 1.0f));
 
         glDrawArrays(GL_TRIANGLES, 0, 3);

@@ -10,6 +10,7 @@ add_executable(game
     src/renderer/renderer.cpp
     src/renderer/window.cpp
     src/renderer/texture.cpp
+    src/game/input.cpp
 )
 
 add_library(glad STATIC lib/glad/src/glad.c)

@@ -33,6 +33,7 @@ namespace renderer {
             lg::fatal("Failed to initialize GLAD");
         }
 
+        glfwSwapInterval(0);
         glViewport(0, 0, viewport.x, viewport.y);
     }
 
