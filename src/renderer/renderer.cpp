@@ -34,6 +34,8 @@ namespace renderer {
         }
 
         glfwSwapInterval(0);
+
+        glEnable(GL_DEPTH_TEST);
         glViewport(0, 0, viewport.x, viewport.y);
     }
 

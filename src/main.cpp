@@ -1,5 +1,6 @@
 #include "renderer/shader.hpp"
 #include "renderer/renderer.hpp"
+#include "game/camera.hpp"
 #include "game/input.hpp"
 #include "time.hpp"
 #include "logger.hpp"
@@ -8,10 +9,56 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
-static float vertices[] = {
-    -0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
-    +0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
-    +0.0f, +0.5f, 0.0f, 0.5f, 1.0f,
+static constexpr size_t BLOCK_FACES = 6;
+
+static float BLOCK_VERTICES[] = {
+    -0.5f, -0.5f, +0.5f, // front
+    -0.5f, +0.5f, +0.5f,
+    +0.5f, +0.5f, +0.5f,
+    +0.5f, -0.5f, +0.5f,
+
+    -0.5f, -0.5f, -0.5f, // back
+    -0.5f, +0.5f, -0.5f,
+    +0.5f, +0.5f, -0.5f,
+    +0.5f, -0.5f, -0.5f,
+
+    -0.5f, +0.5f, -0.5f, // top
+    -0.5f, +0.5f, +0.5f,
+    +0.5f, +0.5f, +0.5f,
+    +0.5f, +0.5f, -0.5f,
+
+    -0.5f, -0.5f, -0.5f, // bottom
+    -0.5f, -0.5f, +0.5f,
+    +0.5f, -0.5f, +0.5f,
+    +0.5f, -0.5f, -0.5f,
+
+    -0.5f, -0.5f, -0.5f, // left
+    -0.5f, +0.5f, -0.5f,
+    -0.5f, +0.5f, +0.5f,
+    -0.5f, -0.5f, +0.5f,
+
+    +0.5f, -0.5f, -0.5f, // right
+    +0.5f, +0.5f, -0.5f,
+    +0.5f, +0.5f, +0.5f,
+    +0.5f, -0.5f, +0.5f,
+};
+
+static float BLOCK_UVS[] = {
+    0.0f, 0.0f,
+    0.0f, 1.0f,
+    1.0f, 1.0f,
+    1.0f, 0.0f,
+};
+
+static uint32_t BLOCK_INDICES[] = {
+    0, 1, 3,
+    1, 2, 3
+};
+
+struct BlockMesh {
+    std::vector<float> vertices;
+    std::vector<float> uvs;
+    std::vector<uint32_t> indices;
 };
 
 struct State {
@@ -23,6 +70,9 @@ struct State {
     uint32_t tps = 0;
     uint32_t vao;
     uint32_t vbo;
+    uint32_t ibo;
+    PerspectiveCamera cam;
+    BlockMesh mesh;
 };
 
 static State g_state;
@@ -32,19 +82,64 @@ int main(int argc, char *argv[]) {
 
     renderer::init(glm::vec2(640, 480), "Game");
 
+    g_state.cam =
+        PerspectiveCamera(glm::vec3(0.0f), 45.0f, glm::vec2(640, 480));
+
+    for (size_t i = 0; i < BLOCK_FACES; i++) {
+        for (size_t j = 0; j < 12; j++) {
+            size_t idx = (i * 12) + j;
+            g_state.mesh.vertices.push_back(BLOCK_VERTICES[idx]);
+        }
+    }
+
+    for (size_t i = 0; i < BLOCK_FACES; i++) {
+        for (size_t j = 0; j < 8; j++) {
+            g_state.mesh.uvs.push_back(BLOCK_UVS[j]);
+        }
+    }
+
+    for (size_t i = 0; i < BLOCK_FACES; i++) {
+        for (size_t j = 0; j < 6; j++) {
+            g_state.mesh.indices.push_back(BLOCK_INDICES[j] + (i * 4));
+        }
+    }
+
+    lg::debug("Creating mesh from {} vertices, {} uvs, and {} indices",
+              g_state.mesh.vertices.size(), 
+              g_state.mesh.uvs.size(),
+              g_state.mesh.indices.size());
+
     glGenVertexArrays(1, &g_state.vao);
     glBindVertexArray(g_state.vao);
 
     glGenBuffers(1, &g_state.vbo);
     glBindBuffer(GL_ARRAY_BUFFER, g_state.vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                          (void *)0);
+    size_t size = (g_state.mesh.vertices.size() * sizeof(float));
+    size += (g_state.mesh.uvs.size() * sizeof(float));
+
+    glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_STATIC_DRAW);
+    glBufferSubData(GL_ARRAY_BUFFER,
+                    0,
+                    g_state.mesh.vertices.size() * sizeof(float),
+                    g_state.mesh.vertices.data());
+    glBufferSubData(GL_ARRAY_BUFFER,
+                    g_state.mesh.vertices.size() * sizeof(float),
+                    g_state.mesh.uvs.size() * sizeof(float),
+                    g_state.mesh.uvs.data());
+
+    glGenBuffers(1, &g_state.ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_state.ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                 g_state.mesh.indices.size() * sizeof(uint32_t),
+                 g_state.mesh.indices.data(),
+                 GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                          (void *)(sizeof(float) * 3));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float),
+                          (void *)(sizeof(float) * g_state.mesh.vertices.size()));
     glEnableVertexAttribArray(1);
 
     renderer::shader::create(
@@ -58,6 +153,9 @@ int main(int argc, char *argv[]) {
 
     const Window& window = renderer::get_window();
     Shader& shader = renderer::shader::get("default");
+
+    shader.set<glm::mat4>("u_view", g_state.cam.view);
+    shader.set<glm::mat4>("u_projection", g_state.cam.projection);
 
     g_state.now = util::time::now();
     g_state.last_second = g_state.now;
@@ -97,13 +195,19 @@ int main(int argc, char *argv[]) {
 
         shader.set<glm::vec4>("u_color", glm::vec4(a, b, c, 1.0f));
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        auto model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -5.0f));
+        model = glm::rotate(model,
+                    static_cast<float>(glfwGetTime() * glm::radians(45.0f)),
+                    glm::vec3(0.5f, 0.5f, 0.0f));
+        shader.set<glm::mat4>("u_model", model);
+
+        glDrawElements(GL_TRIANGLES, g_state.mesh.indices.size(), GL_UNSIGNED_INT, 0);
 
         glfwSwapBuffers(window.handle);
         glfwPollEvents();
 
         glClearColor(0.52f, 0.81f, 0.92f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
     renderer::destroy();
