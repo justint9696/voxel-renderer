@@ -50,6 +50,15 @@ static float BLOCK_UVS[] = {
     1.0f, 0.0f,
 };
 
+static float BLOCK_NORMALS[] = {
+    0.0f, 0.0f, +1.0f, // front
+    0.0f, 0.0f, -1.0f, // back
+    0.0f, +1.0f, 0.0f, // top
+    0.0f, -1.0f, 0.0f, // bottom
+    -1.0f, 0.0f, 0.0f, // left
+    +1.0f, 0.0f, 0.0f, // right
+};
+
 static uint32_t BLOCK_INDICES[] = {
     0, 1, 3,
     1, 2, 3
@@ -58,6 +67,7 @@ static uint32_t BLOCK_INDICES[] = {
 struct BlockMesh {
     std::vector<float> vertices;
     std::vector<float> uvs;
+    std::vector<float> normals;
     std::vector<uint32_t> indices;
 };
 
@@ -126,9 +136,18 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    lg::debug("Creating mesh from {} vertices, {} uvs, and {} indices",
+    for (size_t i = 0; i < BLOCK_FACES; i++) {
+        for (size_t j = 0; j < 4; j++) {
+            for (size_t k = 0; k < 3; k++) {
+                g_state.mesh.normals.push_back(BLOCK_NORMALS[k + (i * 3)]);
+            }
+        }
+    }
+
+    lg::debug("Creating mesh from {} vertices, {} uvs, {} normals, and {} indices",
               g_state.mesh.vertices.size(), 
               g_state.mesh.uvs.size(),
+              g_state.mesh.normals.size(),
               g_state.mesh.indices.size());
 
     glGenVertexArrays(1, &g_state.vao);
@@ -139,6 +158,7 @@ int main(int argc, char *argv[]) {
 
     size_t size = (g_state.mesh.vertices.size() * sizeof(float));
     size += (g_state.mesh.uvs.size() * sizeof(float));
+    size += (g_state.mesh.normals.size() * sizeof(float));
 
     glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_STATIC_DRAW);
     glBufferSubData(GL_ARRAY_BUFFER,
@@ -149,6 +169,11 @@ int main(int argc, char *argv[]) {
                     g_state.mesh.vertices.size() * sizeof(float),
                     g_state.mesh.uvs.size() * sizeof(float),
                     g_state.mesh.uvs.data());
+    glBufferSubData(GL_ARRAY_BUFFER,
+                    (g_state.mesh.uvs.size() 
+                     + g_state.mesh.vertices.size()) * sizeof(float),
+                    g_state.mesh.normals.size() * sizeof(float),
+                    g_state.mesh.normals.data());
 
     glGenBuffers(1, &g_state.ibo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_state.ibo);
@@ -163,6 +188,12 @@ int main(int argc, char *argv[]) {
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float),
                           (void *)(sizeof(float) * g_state.mesh.vertices.size()));
     glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
+                          (void *)(sizeof(float) * 
+                              (g_state.mesh.vertices.size() +
+                               g_state.mesh.uvs.size())));
+    glEnableVertexAttribArray(2);
 
     g_state.now = util::time::now();
     g_state.last_second = g_state.now;
