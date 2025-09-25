@@ -83,7 +83,23 @@ int main(int argc, char *argv[]) {
     renderer::init(glm::vec2(640, 480), "Game");
 
     g_state.cam =
-        PerspectiveCamera(glm::vec3(0.0f), 45.0f, glm::vec2(640, 480));
+        PerspectiveCamera(glm::vec3(0.0f), 45.0f, { 640, 480 });
+
+    renderer::shader::create(
+            "default",
+            "shaders/default.frag.glsl",
+            "shaders/default.vert.glsl");
+    renderer::shader::use("default");
+
+    renderer::texture::create("default", "assets/atlas.png", { 16, 16 });
+    renderer::texture::bind("default");
+    auto uv = renderer::texture::uv_coords("default", 0);
+
+    const Window& window = renderer::get_window();
+    Shader& shader = renderer::shader::get("default");
+
+    shader.set<glm::mat4>("u_view", g_state.cam.view);
+    shader.set<glm::mat4>("u_projection", g_state.cam.projection);
 
     for (size_t i = 0; i < BLOCK_FACES; i++) {
         for (size_t j = 0; j < 12; j++) {
@@ -94,7 +110,13 @@ int main(int argc, char *argv[]) {
 
     for (size_t i = 0; i < BLOCK_FACES; i++) {
         for (size_t j = 0; j < 8; j++) {
-            g_state.mesh.uvs.push_back(BLOCK_UVS[j]);
+            float n = BLOCK_UVS[j];
+            if (n > 0.0f) {
+                n = ((j % 2 == 0) ? uv.w : uv.z);
+            } else {
+                n = ((j % 2 == 0) ? uv.y : uv.x);
+            }
+            g_state.mesh.uvs.push_back(n);
         }
     }
 
@@ -141,21 +163,6 @@ int main(int argc, char *argv[]) {
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float),
                           (void *)(sizeof(float) * g_state.mesh.vertices.size()));
     glEnableVertexAttribArray(1);
-
-    renderer::shader::create(
-            "default",
-            "shaders/default.frag.glsl",
-            "shaders/default.vert.glsl");
-    renderer::shader::use("default");
-
-    renderer::texture::create("default", "assets/brick.jpg");
-    renderer::texture::bind("default");
-
-    const Window& window = renderer::get_window();
-    Shader& shader = renderer::shader::get("default");
-
-    shader.set<glm::mat4>("u_view", g_state.cam.view);
-    shader.set<glm::mat4>("u_projection", g_state.cam.projection);
 
     g_state.now = util::time::now();
     g_state.last_second = g_state.now;

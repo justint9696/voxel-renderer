@@ -57,7 +57,8 @@ namespace input {
     bool key_held(int key, time_t delay) {
         const auto& k = input::try_get(key);
         const time_t now = util::time::now();
-        return ((k.state == input::KeyState::Down) && 
+        return ((k.state == input::KeyState::Down ||
+                 k.state == input::KeyState::Held) &&
                 (now - k.pressed_tick) >= delay);
     }
 

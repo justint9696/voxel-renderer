@@ -3,6 +3,7 @@
 #include "renderer/shader.hpp"
 #include "renderer/window.hpp"
 
+#include <glm/vec4.hpp>
 #include <string>
 
 namespace renderer {
@@ -19,8 +20,10 @@ namespace renderer {
     }
 
     namespace texture {
-        void create(const std::string& name, const std::string& fpath);
+        void create(const std::string& name, const std::string& fpath,
+                    glm::ivec2 size = { 1, 1 });
         void destroy(const std::string& name);
         void bind(const std::string& name);
+        glm::vec4 uv_coords(const std::string& name, uint32_t idx);
     }
 }

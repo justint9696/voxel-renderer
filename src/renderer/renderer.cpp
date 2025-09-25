@@ -68,9 +68,10 @@ namespace renderer {
     }
 
     namespace texture {
-        void create(const std::string& name, const std::string& fpath) {
+        void create(const std::string& name, const std::string& fpath,
+                    glm::ivec2 size) {
             g_renderer.textures.insert(
-                    std::make_pair(name, Texture(fpath)));
+                    std::make_pair(name, Texture(fpath, size)));
         }
 
         void destroy(const std::string& name) {
@@ -79,6 +80,10 @@ namespace renderer {
 
         void bind(const std::string& name) {
             g_renderer.textures.at(name).bind();
+        }
+
+        glm::vec4 uv_coords(const std::string& name, uint32_t idx) {
+            return g_renderer.textures.at(name).uv_coords(idx);
         }
     }
 }
