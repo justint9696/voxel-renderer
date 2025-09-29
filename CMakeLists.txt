@@ -10,6 +10,7 @@ add_executable(game
     src/renderer/renderer.cpp
     src/renderer/window.cpp
     src/renderer/texture.cpp
+    src/renderer/chunk_mesh.cpp
     src/game/input.cpp
 )
 
