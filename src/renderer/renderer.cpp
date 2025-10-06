@@ -50,8 +50,7 @@ namespace renderer {
     namespace shader {
         void create(const std::string& name, const std::string& frag_path,
                     const std::string& vert_path) {
-            g_renderer.shaders.insert(
-                    std::make_pair(name, Shader(frag_path, vert_path)));
+            g_renderer.shaders.try_emplace(name, frag_path, vert_path);
         }
 
         void destroy(const std::string& name) {
@@ -70,8 +69,7 @@ namespace renderer {
     namespace texture {
         void create(const std::string& name, const std::string& fpath,
                     glm::ivec2 size) {
-            g_renderer.textures.insert(
-                    std::make_pair(name, Texture(fpath, size)));
+            g_renderer.textures.try_emplace(name, fpath, size);
         }
 
         void destroy(const std::string& name) {
