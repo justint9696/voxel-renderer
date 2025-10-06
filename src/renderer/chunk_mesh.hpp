@@ -27,6 +27,9 @@ public:
     // renders the vertex data
     void render();
 
+    // clears the chunk mesh
+    void clear();
+
 private:
     uint32_t vao;
     uint32_t vbo;

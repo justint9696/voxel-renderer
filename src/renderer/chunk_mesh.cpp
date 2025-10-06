@@ -21,7 +21,7 @@ void ChunkMesh::allocate(bool dynamic) {
                  ((dynamic) ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW));
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    lg::debug("Allocated {} bytes for mesh", nbytes);
+    lg::info("Allocated {:.2f} MB for mesh", (nbytes / 1000000.0f));
 }
 
 void ChunkMesh::submit() {
@@ -61,7 +61,7 @@ void ChunkMesh::submit() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    lg::debug("Created mesh from {} vertices, {} uvs, {} normals, and {} indices",
+    lg::info("Created mesh from {} vertices, {} uvs, {} normals, and {} indices",
               this->vertices.size(), 
               this->uvs.size(),
               this->normals.size(),
@@ -72,4 +72,11 @@ void ChunkMesh::render() {
     glBindVertexArray(this->vao);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->ibo);
     glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0);
+}
+
+void ChunkMesh::clear() {
+    this->vertices.clear();
+    this->uvs.clear();
+    this->normals.clear();
+    this->indices.clear();
 }
