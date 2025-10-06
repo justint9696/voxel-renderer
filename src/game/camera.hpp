@@ -1,5 +1,7 @@
 #pragma once
 
+#include "game/input.hpp"
+
 #include <glm/common.hpp>
 #include <glm/ext.hpp>
 
@@ -13,23 +15,16 @@ public:
     Camera() = default;
     ~Camera() = default;
 
-    Camera(glm::vec3 position, float fov, glm::vec2 viewport) :
-        position(position), fov(fov), viewport(viewport) {
-            auto target = glm::vec3(0.0f);
-            auto direction = glm::normalize(this->position - target);
-            auto up = glm::vec3(0.0f, 1.0f, 0.0f);
-            this->right = glm::normalize(glm::cross(up, direction));
-            this->up = glm::normalize(glm::cross(direction, this->right));
-            this->view =
-                glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -1.0f));
-    }
+    Camera(glm::vec3 position, float fov, glm::vec2 viewport);
 
-    void update_view() {
-        this->view = glm::lookAt(this->position, glm::vec3(0.0f), this->up);
-    }
+    void tick(float dt);
+
+    void update_view_matrix();
 
 protected:
     float fov;
+    float yaw = -90.0f;
+    float pitch = 0.0f;
     glm::vec2 viewport;
     glm::vec3 up;
     glm::vec3 right;
@@ -43,7 +38,8 @@ public:
 
     PerspectiveCamera(glm::vec3 position, float fov, glm::vec2 viewport) :
         Camera(position, fov, viewport) {
-            this->projection = glm::perspective(glm::radians(fov),
+            this->projection = glm::perspective(
+                    glm::radians(fov),
                     viewport.x / viewport.y,
                     0.1f, 100.0f);
         }

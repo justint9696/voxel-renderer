@@ -1,17 +1,18 @@
 cmake_minimum_required(VERSION 3.21...3.31)
-project(game-engine)
+project(voxel_renderer)
 
 set(CMAKE_CXX_STANDARD 20)
 
 add_executable(game
     src/main.cpp
     src/logger.cpp
+    src/game/camera.cpp
+    src/game/input.cpp
     src/renderer/shader.cpp
     src/renderer/renderer.cpp
     src/renderer/window.cpp
     src/renderer/texture.cpp
     src/renderer/chunk_mesh.cpp
-    src/game/input.cpp
 )
 
 add_library(glad STATIC lib/glad/src/glad.c)

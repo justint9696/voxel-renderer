@@ -16,7 +16,14 @@ namespace input {
         time_t released_tick = 0;
     };
 
+    struct Mouse {
+        glm::vec2 prev;
+        glm::vec2 pos;
+    };
+
     static std::map<int, input::Key> g_keys;
+
+    static Mouse g_mouse;
 
     static inline input::Key& try_get(int key) {
         input::Key k;
@@ -65,5 +72,25 @@ namespace input {
     bool key_released(int key) {
         const auto& k = input::try_get(key);
         return k.state == input::KeyState::Up;
+    }
+
+    namespace mouse {
+        void init(glm::vec2 pos) {
+            g_mouse.prev = pos;
+            g_mouse.pos = pos;
+        }
+
+        void update(glm::vec2 pos) {
+            g_mouse.prev = g_mouse.pos;
+            g_mouse.pos = pos;
+        }
+
+        glm::vec2 delta(void) {
+            return g_mouse.pos - g_mouse.prev;
+        }
+
+        void reset(void) {
+            g_mouse.prev = g_mouse.pos;
+        }
     }
 }
