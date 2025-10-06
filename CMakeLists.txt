@@ -31,7 +31,7 @@ target_link_libraries(game
 target_include_directories(game PRIVATE
     lib/glad/include
     lib/glfw/include
-    lib/glm/include
+    lib/glm
     lib/stb
     src
 )
