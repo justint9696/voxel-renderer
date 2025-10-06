@@ -3,16 +3,14 @@
 #include <format>
 #include <string_view>
 
-#define xassert(_e, _fmt, ...) do { \
+#define XASSERT(_e, _fmt, ...) do { \
     if (!(_e)) { \
         lg::fatal("Assertion failure: {}:{}: " _fmt, \
                   __FILE__, __LINE__, ##__VA_ARGS__); \
     } \
 } while (0)
 
-#ifndef assert
-#define assert(_e) xassert(_e, #_e)
-#endif // assert
+#define ASSERT(_e) XASSERT(_e, #_e)
 
 namespace lg {
     enum class LogLevel {

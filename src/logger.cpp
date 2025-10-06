@@ -50,7 +50,7 @@ namespace lg {
         }
 
         const char *mode = ((append) ? "a+" : "w+");
-        assert((g_logger.fp = fopen(fname.c_str(), mode)));
+        ASSERT((g_logger.fp = fopen(fname.c_str(), mode)));
     }
 
     void set_file_level(LogLevel level) {
