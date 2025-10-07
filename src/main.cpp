@@ -1,10 +1,9 @@
-#include "renderer/shader.hpp"
-#include "renderer/renderer.hpp"
 #include "game/camera.hpp"
 #include "game/input.hpp"
+#include "renderer/renderer.hpp"
 #include "world/chunk.hpp"
-#include "time.hpp"
 #include "logger.hpp"
+#include "time.hpp"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -39,7 +38,7 @@ int main(int argc, char *argv[]) {
     float dt, fixed_dt;
     fixed_dt = (1.0f * NS_PER_TICK / NS_PER_SECOND);
 
-    while (window.is_open()) {
+    while (true) {
         glfwPollEvents();
         glfwSwapBuffers(window.handle);
 
@@ -47,7 +46,6 @@ int main(int argc, char *argv[]) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         if (input::key_pressed(GLFW_KEY_Q)) {
-            window.close();
             break;
         }
 
@@ -101,7 +99,7 @@ static void init(void) {
 
     renderer::texture::create("atlas", "assets/atlas.png", { 16, 16 });
 
-    g_state.chunk = Chunk({ 0.0f, 0.0f, -5.0f });
+    g_state.chunk = Chunk({ 0.0f, -5.0f, 0.0f });
 
     g_state.now = util::time::now();
     g_state.last_second = g_state.now;

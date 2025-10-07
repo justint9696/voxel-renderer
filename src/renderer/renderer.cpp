@@ -36,10 +36,12 @@ namespace renderer {
         glfwSwapInterval(0);
 
         glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
         glViewport(0, 0, viewport.x, viewport.y);
     }
 
     void destroy() {
+        g_renderer.window.close();
         glfwTerminate();
     }
 

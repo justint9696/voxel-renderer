@@ -1,7 +1,5 @@
 #pragma once
 
-#include "game/input.hpp"
-
 #include <glm/common.hpp>
 #include <glm/ext.hpp>
 
