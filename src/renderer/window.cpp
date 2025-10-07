@@ -7,7 +7,7 @@
 void keyboard_callback(GLFWwindow *window, int key, int scancode, int action,
                        int mods);
 
-void mouse_callback(GLFWwindow *window, double xpos, double ypos);
+void mouse_callback(GLFWwindow *window, double x, double y);
 
 Window::Window(glm::vec2 size, const std::string& title) : size(size) {
     if ((this->handle = glfwCreateWindow(

@@ -15,19 +15,19 @@ public:
     ChunkMesh() = default;
     ~ChunkMesh() = default;
 
-    // initialize vertex buffers
+    // Initializes the vertex buffers
     void init();
 
-    // allocates gpu memory from the current buffer sizes
+    // Allocates gpu memory from the current buffer sizes
     void allocate(bool dynamic = false);
 
-    // sends vertex data to the gpu
+    // Sends vertex data to the gpu
     void submit();
 
-    // renders the vertex data
+    // Renders the vertex data
     void render();
 
-    // clears the chunk mesh
+    // Clears the chunk mesh
     void clear();
 
 private:

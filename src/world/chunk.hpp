@@ -13,6 +13,7 @@ public:
 
     Chunk(glm::vec3 position, uint32_t view_distance = 1);
 
+    // Draws all the chunk sections
     void render(const Camera& cam);
 
 private:

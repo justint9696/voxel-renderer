@@ -17,6 +17,7 @@ public:
         }
     }
 
+    // Sets a shader uniform by type
     template <typename Tp>
     void set(const std::string& name, Tp value);
 

@@ -18,10 +18,10 @@ public:
         glBindTexture(GL_TEXTURE_2D, this->handle);
     }
 
-    // return uv coords from a cell position
+    // Returns uv coords from a cell position
     glm::vec4 uv_coords(glm::vec2 pos);
 
-    // return uv coords from a cell index
+    // Returns uv coords from a cell index
     glm::vec4 uv_coords(uint32_t idx);
 
 private:

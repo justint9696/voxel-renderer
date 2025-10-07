@@ -61,9 +61,6 @@ const glm::vec3 BLOCK_NORMALS[] = {
 };
 
 const uint32_t BLOCK_INDICES[] = {
-    0, 1, 3, // front faces
-    1, 2, 3,
-
-    0, 3, 1, // back faces
-    3, 2, 1
+    0, 1, 3, 1, 2, 3, // front faces
+    0, 3, 1, 3, 2, 1  // back faces
 };

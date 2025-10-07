@@ -31,7 +31,7 @@ Texture::Texture(const std::string& fname, glm::ivec2 size) : size(size) {
     this->dim = { width, height };
     lg::debug("Created texture {} of size ({}, {})", fname, width, height);
 
-    assert(data);
+    ASSERT(data);
     stbi_image_free(data);
 }
 
