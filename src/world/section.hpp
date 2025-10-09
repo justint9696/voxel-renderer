@@ -5,10 +5,10 @@
 
 #include <glm/vec4.hpp>
 
-constexpr size_t CHUNK_WIDTH = 16;
-constexpr size_t CHUNK_HEIGHT = 16;
-constexpr size_t CHUNK_DEPTH = 16;
-constexpr size_t CHUNK_VOLUME = (CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_DEPTH);
+constexpr int32_t CHUNK_WIDTH = 16;
+constexpr int32_t CHUNK_HEIGHT = 16;
+constexpr int32_t CHUNK_DEPTH = 16;
+constexpr int32_t CHUNK_VOLUME = (CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_DEPTH);
 
 class ChunkSection {
 public:

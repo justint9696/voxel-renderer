@@ -8,16 +8,12 @@
 #include <cmath>
 
 ChunkSection::ChunkSection(glm::vec3 position) : position(position) {
-    uint32_t idx = 0, tmp;
-    auto pos = glm::vec3(0.0f);
-
     uint32_t height = 0;
     this->blocks.reserve(CHUNK_VOLUME);
     for (size_t x = 0; x < CHUNK_WIDTH; x++) {
         for (size_t z = 0; z < CHUNK_DEPTH; z++) {
             height = this->max_terrain_height(x, z);
             for (size_t y = 0; y < height; y++) {
-                pos = this->position_from_index(idx++);
                 this->blocks.emplace_back(BlockType::Grass);
             }
         }

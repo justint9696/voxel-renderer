@@ -88,9 +88,6 @@ static void init(void) {
 
     renderer::init(SCREEN_SIZE, "Game");
 
-    g_state.cam =
-        PerspectiveCamera(glm::vec3(0.0f), 90.0f, SCREEN_SIZE);
-
     renderer::shader::create(
             "default",
             "shaders/default.frag.glsl",
@@ -99,7 +96,9 @@ static void init(void) {
 
     renderer::texture::create("atlas", "assets/atlas.png", { 16, 16 });
 
-    g_state.chunk = Chunk({ 0.0f, -5.0f, 0.0f });
+    g_state.chunk = Chunk({ 0.0f, 0.0f, 0.0f });
+
+    g_state.cam = PerspectiveCamera(g_state.chunk.center(), 90.0f, SCREEN_SIZE);
 
     g_state.now = util::time::now();
     g_state.last_second = g_state.now;

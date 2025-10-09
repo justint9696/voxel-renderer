@@ -13,8 +13,11 @@ public:
 
     Chunk(glm::vec3 position, uint32_t view_distance = 1);
 
-    // Draws all the chunk sections
+    // Draws the current chunk
     void render(const Camera& cam);
+
+    // Returns the center of the chunk
+    glm::vec3 center(void) const;
 
 private:
     std::vector<ChunkSection> sections;

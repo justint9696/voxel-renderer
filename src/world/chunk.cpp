@@ -7,14 +7,16 @@
 
 Chunk::Chunk(glm::vec3 position, uint32_t view_distance) :
         position(position), view_distance(view_distance) {
-    glm::vec3 pos;
-    size_t nchunks = (this->view_distance * 2) + 1;
+    size_t nchunks = (view_distance * 2) + 1;
     lg::info("Creating {} chunk sections", std::pow(nchunks, 2));
 
-    for (float x = 0.0f; x < nchunks; x++) {
-        for (float z = 0.0f; z < nchunks; z++) {
+    glm::vec3 pos;
+    for (int32_t x = 0; x < nchunks; x++) {
+        for (int32_t z = 0; z < nchunks; z++) {
             pos = this->position +
                   glm::vec3(x * CHUNK_WIDTH, 0.0f, z * CHUNK_DEPTH);
+            lg::info("Creating chunk at ({}, {}, {})",
+                      pos.x, pos.y, pos.z);
             this->sections.emplace_back(pos);
         }
     }
@@ -33,4 +35,13 @@ void Chunk::render(const Camera& cam) {
     for (auto& section : this->sections) {
         section.render();
     }
+}
+
+glm::vec3 Chunk::center(void) const {
+    size_t size = ((this->view_distance * 2) + 1);
+    return this->position + glm::vec3( 
+        ((size * CHUNK_WIDTH) / 2.0f),
+        CHUNK_HEIGHT + 5.0f,
+        ((size * CHUNK_DEPTH) / 2.0f)
+    );
 }
