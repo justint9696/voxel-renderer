@@ -30,7 +30,7 @@ void Chunk::render(const Camera& cam) {
 
     shader.set<glm::mat4>("u_view", cam.view);
     shader.set<glm::mat4>("u_projection", cam.projection);
-    shader.set<glm::vec4>("u_color", glm::vec4(1.0f));;
+    shader.set<glm::vec4>("u_color", glm::vec4(1.0f));
 
     for (auto& section : this->sections) {
         section.render();

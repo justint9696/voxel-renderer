@@ -7,60 +7,34 @@
 
 constexpr size_t BLOCK_FACES = 6;
 
+constexpr uint32_t BLOCK_SOLID = (1 << 0);
+constexpr uint32_t BLOCK_ANIMATED = (1 << 1);
+
 enum class BlockType {
     Air = 0,
     Grass,
+    Dirt,
+    Stone,
 };
 
-const glm::vec3 BLOCK_VERTICES[] = {
-    { 0.0f, 0.0f, 0.0f }, // front
-    { 0.0f, 1.0f, 0.0f },
-    { 1.0f, 1.0f, 0.0f },
-    { 1.0f, 0.0f, 0.0f },
-
-    { 0.0f, 1.0f, 0.0f }, // top
-    { 0.0f, 1.0f, 1.0f },
-    { 1.0f, 1.0f, 1.0f },
-    { 1.0f, 1.0f, 0.0f },
-
-    { 1.0f, 0.0f, 0.0f }, // right
-    { 1.0f, 1.0f, 0.0f },
-    { 1.0f, 1.0f, 1.0f },
-    { 1.0f, 0.0f, 1.0f },
-
-    { 0.0f, 0.0f, 1.0f }, // back
-    { 0.0f, 1.0f, 1.0f },
-    { 1.0f, 1.0f, 1.0f },
-    { 1.0f, 0.0f, 1.0f },
-
-    { 0.0f, 0.0f, 0.0f }, // bottom
-    { 0.0f, 0.0f, 1.0f },
-    { 1.0f, 0.0f, 1.0f },
-    { 1.0f, 0.0f, 0.0f },
-
-    { 0.0f, 0.0f, 0.0f }, // left
-    { 0.0f, 1.0f, 0.0f },
-    { 0.0f, 1.0f, 1.0f },
-    { 0.0f, 0.0f, 1.0f },
+enum class BlockTexture {
+    Grass0 = 0,
+    Grass1,
+    Dirt0,
+    Stone0,
 };
 
-const glm::vec2 BLOCK_UVS[] = {
-    { 0.0f, 0.0f },
-    { 0.0f, 1.0f },
-    { 1.0f, 1.0f },
-    { 1.0f, 0.0f },
+struct Block {
+    BlockTexture top;
+    BlockTexture front;
+    uint32_t flags;
+    uint32_t frames;
+    float opacity;
 };
 
-const glm::vec3 BLOCK_NORMALS[] = {
-    { 0.0f, 0.0f, -1.0f }, // front
-    { 0.0f, +1.0f, 0.0f }, // top
-    { +1.0f, 0.0f, 0.0f }, // right
-    { 0.0f, 0.0f, +1.0f }, // back
-    { 0.0f, -1.0f, 0.0f }, // bottom
-    { -1.0f, 0.0f, 0.0f }, // left
-};
+extern const Block BLOCK_TABLE[];
 
-const uint32_t BLOCK_INDICES[] = {
-    0, 1, 3, 1, 2, 3, // front faces
-    0, 3, 1, 3, 2, 1  // back faces
-};
+extern const glm::vec3 BLOCK_VERTICES[];
+extern const glm::vec2 BLOCK_UVS[];
+extern const glm::vec3 BLOCK_NORMALS[];
+extern const uint32_t BLOCK_INDICES[];

@@ -13,8 +13,17 @@ ChunkSection::ChunkSection(glm::vec3 position) : position(position) {
     for (size_t x = 0; x < CHUNK_WIDTH; x++) {
         for (size_t z = 0; z < CHUNK_DEPTH; z++) {
             height = this->max_terrain_height(x, z);
-            for (size_t y = 0; y < height; y++) {
-                this->blocks.emplace_back(BlockType::Grass);
+            for (size_t y = 0; y < CHUNK_HEIGHT; y++) {
+                if (y >= height) {
+                    this->blocks.emplace_back(BlockType::Air);
+                } else if (y == height - 1) {
+                    this->blocks.emplace_back(BlockType::Grass);
+                }
+                else if (y >= height - 3) {
+                    this->blocks.emplace_back(BlockType::Dirt);
+                } else {
+                    this->blocks.emplace_back(BlockType::Stone);
+                }
             }
         }
     }
@@ -36,6 +45,7 @@ void ChunkSection::render() {
 }
 
 void ChunkSection::prepare_mesh() {
+    uint32_t idx = 0;
     size_t n = 0;
     glm::vec3 position;
     glm::vec3 normal;
@@ -45,17 +55,24 @@ void ChunkSection::prepare_mesh() {
     this->mesh.clear();
 
     for (size_t i = 0; i < CHUNK_VOLUME; i++) {
-        const auto& block = this->blocks.at(i);
-        if (block == BlockType::Air)
+        const auto& type = this->blocks.at(i);
+        if (type == BlockType::Air)
             continue;
 
+        idx = static_cast<uint32_t>(type) - 1;
+        const auto& block = BLOCK_TABLE[idx];
         position = this->position_from_index(i);
-        uv = renderer::texture::uv_coords(
-                "atlas", static_cast<uint32_t>(block) - 1);
         for (size_t j = 0; j < BLOCK_FACES; j++) {
             normal = BLOCK_NORMALS[j];
             if (!this->is_visible(position, normal))
                 continue;
+
+            if (fabs(normal.y) < 1.0f)
+                uv = renderer::texture::uv_coords(
+                        "atlas", static_cast<uint32_t>(block.front));
+            else
+                uv = renderer::texture::uv_coords(
+                        "atlas", static_cast<uint32_t>(block.top));
 
             this->mesh_block_face(position, normal, uv, j, n++);
         }

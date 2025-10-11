@@ -13,6 +13,7 @@ add_executable(game
     src/renderer/window.cpp
     src/renderer/texture.cpp
     src/renderer/chunk_mesh.cpp
+    src/world/block.cpp
     src/world/chunk.cpp
     src/world/section.cpp
 )
