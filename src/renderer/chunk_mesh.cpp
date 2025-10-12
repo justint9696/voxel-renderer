@@ -21,7 +21,7 @@ void ChunkMesh::allocate(bool dynamic) {
                  ((dynamic) ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW));
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    lg::info("Allocated {:.2f} MB for mesh", (nbytes / 1000000.0f));
+    lg::trace("Allocated {:.2f} MB for mesh", (nbytes / 1000000.0f));
 }
 
 void ChunkMesh::submit() {
@@ -61,7 +61,7 @@ void ChunkMesh::submit() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    lg::info("Created mesh from {} vertices, {} uvs, {} normals, and {} indices",
+    lg::trace("Created mesh from {} vertices, {} uvs, {} normals, and {} indices",
               this->vertices.size(), 
               this->uvs.size(),
               this->normals.size(),

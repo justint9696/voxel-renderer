@@ -83,6 +83,7 @@ int main(int argc, char *argv[]) {
 
 static void init(void) {
     lg::set_file("output.log");
+    lg::set_stdout_level(lg::LogLevel::Info);
 
     renderer::init(SCREEN_SIZE, "Game");
 
