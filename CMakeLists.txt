@@ -16,6 +16,7 @@ add_executable(game
     src/world/block.cpp
     src/world/chunk.cpp
     src/world/section.cpp
+    src/world/world.cpp
 )
 
 add_library(glad STATIC lib/glad/src/glad.c)

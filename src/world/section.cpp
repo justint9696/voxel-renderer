@@ -8,38 +8,15 @@
 #include <cmath>
 
 ChunkSection::ChunkSection(glm::vec3 position) : position(position) {
-    uint32_t height = 0;
-    this->blocks.reserve(CHUNK_VOLUME);
-    for (size_t x = 0; x < CHUNK_WIDTH; x++) {
-        for (size_t z = 0; z < CHUNK_DEPTH; z++) {
-            height = this->max_terrain_height(x, z);
-            for (size_t y = 0; y < CHUNK_HEIGHT; y++) {
-                if (y >= height) {
-                    this->blocks.emplace_back(BlockType::Air);
-                } else if (y == height - 1) {
-                    this->blocks.emplace_back(BlockType::Grass);
-                }
-                else if (y >= height - 3) {
-                    this->blocks.emplace_back(BlockType::Dirt);
-                } else {
-                    this->blocks.emplace_back(BlockType::Stone);
-                }
-            }
-        }
-    }
-
     this->mesh.init();
-    this->prepare_mesh();
+    this->blocks.reserve(CHUNK_VOLUME);
+    this->generate(position);
 }
 
-void ChunkSection::render() {
+void ChunkSection::render(void) {
     auto& shader = renderer::shader::get("default");
     auto model = glm::translate(glm::mat4(1.0f), this->position);
     shader.set<glm::mat4>("u_model", model);
-
-    if (this->is_dirty) {
-        this->prepare_mesh();
-    }
 
     this->mesh.render();
 }
@@ -81,7 +58,7 @@ void ChunkSection::prepare_mesh() {
     this->mesh.allocate(false);
     this->mesh.submit();
 
-    this->is_dirty = false;
+    this->dirty = false;
 }
 
 glm::vec3 ChunkSection::position_from_index(uint32_t idx) {
@@ -154,4 +131,36 @@ bool ChunkSection::is_visible(glm::vec3 position, glm::vec3 normal) {
         return true;
 
     return this->blocks.at(idx) == BlockType::Air;
+}
+
+bool ChunkSection::contains(glm::vec3 position) {
+    return ((this->position.x <= position.x &&
+             this->position.x + CHUNK_WIDTH > position.x) &&
+            (this->position.z <= position.z &&
+             this->position.z + CHUNK_DEPTH > position.z));
+}
+
+void ChunkSection::generate(glm::vec3 position) {
+    lg::trace("Generating chunk at ({}, {}, {})",
+              position.x, position.y, position.z);
+    uint32_t height = 0;
+    for (size_t x = 0; x < CHUNK_WIDTH; x++) {
+        for (size_t z = 0; z < CHUNK_DEPTH; z++) {
+            height = this->max_terrain_height(x, z);
+            for (size_t y = 0; y < CHUNK_HEIGHT; y++) {
+                if (y >= height) {
+                    this->blocks.emplace_back(BlockType::Air);
+                } else if (y == height - 1) {
+                    this->blocks.emplace_back(BlockType::Grass);
+                } else if (y >= height - 3) {
+                    this->blocks.emplace_back(BlockType::Dirt);
+                } else {
+                    this->blocks.emplace_back(BlockType::Stone);
+                }
+            }
+        }
+    }
+
+    this->position = position;
+    this->dirty = true;
 }

@@ -1,7 +1,6 @@
-#include "game/camera.hpp"
 #include "game/input.hpp"
 #include "renderer/renderer.hpp"
-#include "world/chunk.hpp"
+#include "world/world.hpp"
 #include "logger.hpp"
 #include "time.hpp"
 
@@ -19,8 +18,7 @@ struct State {
     time_t last_frame = 0;
     uint32_t fps = 0;
     uint32_t tps = 0;
-    PerspectiveCamera cam;
-    Chunk chunk;
+    World world;
 };
 
 static State g_state;
@@ -96,9 +94,7 @@ static void init(void) {
 
     renderer::texture::create("atlas", "assets/atlas.png", { 16, 16 });
 
-    g_state.chunk = Chunk({ 0.0f, 0.0f, 0.0f });
-
-    g_state.cam = PerspectiveCamera(g_state.chunk.center(), 90.0f, SCREEN_SIZE);
+    g_state.world = World({ 0.0f, 0.0f, 0.0f });
 
     g_state.now = util::time::now();
     g_state.last_second = g_state.now;
@@ -106,15 +102,15 @@ static void init(void) {
 }
 
 static void update(float dt) {
-
+    g_state.world.update(dt);
 }
 
 static void tick(float dt) {
-    g_state.cam.tick(dt);
+    g_state.world.tick(dt);
 }
 
 static void render(void) {
-    g_state.chunk.render(g_state.cam);
+    g_state.world.render();
 }
 
 static void destroy(void) {
