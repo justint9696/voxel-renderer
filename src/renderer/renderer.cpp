@@ -1,4 +1,5 @@
 #include "renderer/renderer.hpp"
+
 #include "renderer/texture.hpp"
 #include "logger.hpp"
 
@@ -10,6 +11,7 @@ namespace renderer {
             Window window;
             std::map<std::string, Shader> shaders;
             std::map<std::string, Texture> textures;
+            std::map<std::string, Font> fonts;
 
         public:
             Renderer() = default;
@@ -33,10 +35,15 @@ namespace renderer {
             lg::fatal("Failed to initialize GLAD");
         }
 
+        // disable vsync
         glfwSwapInterval(0);
 
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
+
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
         glViewport(0, 0, viewport.x, viewport.y);
     }
 
@@ -84,6 +91,27 @@ namespace renderer {
 
         glm::vec4 uv_coords(const std::string& name, uint32_t idx) {
             return g_renderer.textures.at(name).uv_coords(idx);
+        }
+    }
+
+    namespace font {
+        namespace intern {
+            void create_font_str(const std::string& name, glm::vec2 pos,
+                                 float scale, const std::string& text) {
+                auto& font = g_renderer.fonts.at(name);
+                font.create(text, pos, scale);
+            }
+        }
+
+        void create(const std::string& name, const std::string& frag_path,
+                    const std::string& vert_path, const std::string tex_path,
+                    glm::ivec2 size) {
+            g_renderer.fonts.try_emplace(
+                    name, frag_path, vert_path, tex_path, size);
+        }
+
+        Font& get(const std::string& name) {
+            return g_renderer.fonts.at(name);
         }
     }
 }

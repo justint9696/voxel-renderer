@@ -5,6 +5,10 @@
 
 class World {
 public:
+    Chunk chunk;
+    PerspectiveCamera camera;
+
+public:
     World() = default;
     ~World() = default;
 
@@ -13,8 +17,4 @@ public:
     void update(float dt);
     void tick(float dt);
     void render(void);
-
-public:
-    Chunk chunk;
-    PerspectiveCamera camera;
 };

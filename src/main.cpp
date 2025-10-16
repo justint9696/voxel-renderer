@@ -19,6 +19,7 @@ struct State {
     uint32_t fps = 0;
     uint32_t tps = 0;
     World world;
+    OrthoCamera cam;
 };
 
 static State g_state;
@@ -73,6 +74,16 @@ int main(int argc, char *argv[]) {
 
         g_state.fps++;
 
+        renderer::font::draw(
+                "default", { 0, -10 }, 8.0f,
+                "Position: ({:.0f}, {:.0f}, {:.0f})",
+                g_state.world.camera.position.x,
+                g_state.world.camera.position.y,
+                g_state.world.camera.position.z);
+        renderer::font::draw(
+                "default", { 0, -20 }, 8.0f,
+                "The quick brown fox jumped over the lazy dog");
+
         update(dt);
         render();
     }
@@ -95,7 +106,14 @@ static void init(void) {
 
     renderer::texture::create("atlas", "assets/atlas.png", { 16, 16 });
 
+    renderer::font::create(
+            "default",
+            "shaders/font.frag.glsl", "shaders/font.vert.glsl",
+            "assets/font.png", { 11, 17 });
+
     g_state.world = World({ 0.0f, 0.0f, 0.0f });
+
+    g_state.cam = OrthoCamera(SCREEN_SIZE);
 
     g_state.now = util::time::now();
     g_state.last_second = g_state.now;
@@ -112,6 +130,9 @@ static void tick(float dt) {
 
 static void render(void) {
     g_state.world.render();
+
+    auto& font = renderer::font::get("default");
+    font.render(g_state.cam);
 }
 
 static void destroy(void) {
