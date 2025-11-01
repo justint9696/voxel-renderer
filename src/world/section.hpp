@@ -12,6 +12,12 @@ constexpr int32_t CHUNK_VOLUME = (CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_DEPTH);
 
 class ChunkSection {
 public:
+    bool is_dirty = true;
+    glm::vec3 position;
+    ChunkMesh mesh;
+    std::vector<BlockType> blocks;
+
+public:
     ChunkSection() = default;
     ~ChunkSection() = default;
 
@@ -31,25 +37,6 @@ public:
     // Generates the chunk section
     void generate(glm::vec3 position);
 
-    // Prepares the mesh for rendering
-    void prepare_mesh();
-
-    // Returns true if the section needs to be re-meshed
-    inline bool is_dirty() {
-        return this->dirty;
-    }
-
-    inline glm::vec3 get_position() {
-        return this->position;
-    }
-
-private:
-    bool dirty = true;
-    glm::vec3 position;
-    ChunkMesh mesh;
-    std::vector<BlockType> blocks;
-
-private:
     // Determines if a face is visible within the mesh
     bool is_visible(glm::vec3 position, glm::vec3 normal);
 

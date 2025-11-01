@@ -21,60 +21,22 @@ void ChunkSection::render(void) {
     this->mesh.render();
 }
 
-void ChunkSection::prepare_mesh() {
-    uint32_t idx = 0;
-    size_t n = 0;
-    glm::vec3 position;
-    glm::vec3 normal;
-    glm::vec4 uv;
-
-    // destroy the previous mesh
-    this->mesh.clear();
-
-    for (size_t i = 0; i < CHUNK_VOLUME; i++) {
-        const auto& type = this->blocks.at(i);
-        if (type == BlockType::Air)
-            continue;
-
-        idx = static_cast<uint32_t>(type) - 1;
-        const auto& block = BLOCK_TABLE[idx];
-        position = this->position_from_index(i);
-        for (size_t j = 0; j < BLOCK_FACES; j++) {
-            normal = BLOCK_NORMALS[j];
-            if (!this->is_visible(position, normal))
-                continue;
-
-            if (fabs(normal.y) < 1.0f)
-                uv = renderer::texture::uv_coords(
-                        "atlas", static_cast<uint32_t>(block.front));
-            else
-                uv = renderer::texture::uv_coords(
-                        "atlas", static_cast<uint32_t>(block.top));
-
-            this->mesh_block_face(position, normal, uv, j, n++);
-        }
-    }
-
-    this->mesh.allocate(false);
-    this->mesh.submit();
-
-    this->dirty = false;
-}
-
 glm::vec3 ChunkSection::position_from_index(uint32_t idx) {
     if (idx >= CHUNK_VOLUME) {
         lg::fatal("Index out of bounds: {}", idx);
     }
 
-    return {
+    return this->position + glm::vec3(
         floorf(1.0f * idx / (CHUNK_HEIGHT * CHUNK_DEPTH)),
         idx % CHUNK_HEIGHT,
         fmodf(floorf(1.0f * idx / CHUNK_HEIGHT), CHUNK_DEPTH)
-    };
+    );
 }
 
 int32_t ChunkSection::index_from_position(glm::vec3 position) {
     int32_t idx;
+
+    position -= this->position;
     if ((position.x < 0 || position.x >= CHUNK_WIDTH) || 
         (position.y < 0 || position.y >= CHUNK_HEIGHT) ||
         (position.z < 0 || position.z >= CHUNK_DEPTH))
@@ -86,7 +48,6 @@ int32_t ChunkSection::index_from_position(glm::vec3 position) {
 
     if (idx >= CHUNK_VOLUME || idx < 0)
         return -1;
-
 
     return idx;
 }
@@ -130,7 +91,10 @@ bool ChunkSection::is_visible(glm::vec3 position, glm::vec3 normal) {
     if (idx < 0)
         return true;
 
-    return this->blocks.at(idx) == BlockType::Air;
+    auto& type = this->blocks.at(idx);
+    auto& block = BLOCK_TABLE[static_cast<uint32_t>(type)];
+
+    return ((type == BlockType::Air) || (block.flags & BLOCK_TRANSPARENT));
 }
 
 bool ChunkSection::contains(glm::vec3 position) {
@@ -162,5 +126,5 @@ void ChunkSection::generate(glm::vec3 position) {
     }
 
     this->position = position;
-    this->dirty = true;
+    this->is_dirty = true;
 }

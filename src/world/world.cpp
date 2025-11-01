@@ -5,7 +5,7 @@
 constexpr glm::ivec2 SCREEN_SIZE = { 1280, 720 };
 
 World::World(glm::vec3 pos) :
-        chunk(pos, 3) {
+        chunk(pos) {
     this->camera = PerspectiveCamera(this->chunk.center(), 90.0f, SCREEN_SIZE);
 }
 
@@ -15,7 +15,8 @@ void World::update(float dt) {
 
 void World::tick(float dt) {
     this->camera.tick(dt);
-    if (!this->chunk.in_center(this->camera.position)) {
+    this->chunk.tick(dt);
+    if (!this->chunk.position_in_center(this->camera.position)) {
         this->chunk.swap(this->camera.position);
     }
 }

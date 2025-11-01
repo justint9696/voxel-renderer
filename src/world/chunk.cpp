@@ -8,6 +8,8 @@
 Chunk::Chunk(glm::vec3 position, uint32_t view_distance) :
         position(position), view_distance(view_distance) {
     size_t nchunks = (view_distance * 2) + 1;
+
+    this->sections.reserve(std::pow(nchunks, 2));
     lg::info("Creating {} chunk sections", std::pow(nchunks, 2));
 
     glm::vec3 pos;
@@ -27,6 +29,15 @@ void Chunk::update(float dt) {
     this->mesh_count = 0;
 }
 
+void Chunk::tick(float dt) {
+    for (auto& section : this->sections) {
+        if (section.is_dirty && this->mesh_count < MESH_PER_FRAME) {
+            this->mesh_count++;
+            this->prepare_mesh(section);
+        }
+    }
+}
+
 void Chunk::render(const Camera& cam) {
     auto& shader = renderer::shader::get("default");
     shader.use();
@@ -38,11 +49,6 @@ void Chunk::render(const Camera& cam) {
     shader.set<glm::vec4>("u_color", glm::vec4(1.0f));
 
     for (auto& section : this->sections) {
-        if (section.is_dirty() && this->mesh_count < this->mesh_per_frame) {
-            this->mesh_count++;
-            section.prepare_mesh();
-        }
-
         section.render();
     }
 }
@@ -56,12 +62,12 @@ glm::vec3 Chunk::center(void) const {
     );
 }
 
-bool Chunk::in_center(glm::vec3 position) {
+bool Chunk::position_in_center(glm::vec3 position) {
     auto center =
         this->position + (glm::vec3(CHUNK_WIDTH, 0.0f, CHUNK_DEPTH) *
                           static_cast<float>(this->view_distance));
     for (auto& section : this->sections) {
-        if (section.get_position() == center)
+        if (section.position == center)
             return section.contains(position);
     }
 
@@ -69,15 +75,12 @@ bool Chunk::in_center(glm::vec3 position) {
 }
 
 void Chunk::swap(glm::vec3 position) {
-    if (this->mesh_count++ >= this->mesh_per_frame)
-        return;
-
-    auto norm = glm::vec3(0.0f);
-
-    // determine the swap direction norm
     auto center =
         this->position + (glm::vec3(CHUNK_WIDTH, 0.0f, CHUNK_DEPTH) *
                           static_cast<float>(this->view_distance));
+
+    // determine the swap direction vector
+    auto norm = glm::vec3(0.0f);
     if (position.x < center.x)
         norm.x = -1.0f;
     else if (position.x >= center.x + CHUNK_WIDTH)
@@ -87,19 +90,88 @@ void Chunk::swap(glm::vec3 position) {
     else if (position.z >= center.z + CHUNK_DEPTH)
         norm.z = 1.0f;
 
-    // update the chunk position by direction norm
     auto vdir = norm * glm::vec3(CHUNK_WIDTH, 0.0f, CHUNK_DEPTH);
-    this->position += vdir;
 
-    // regen sections that are outside bounds
-    float dist = static_cast<float>((this->view_distance * 2) + 1);
+    // update the chunk position by direction vector
+    this->position += vdir;
+    lg::debug("Position updated ({}, {}, {})",
+            this->position.x, this->position.y, this->position.z);
+
+    auto dist = static_cast<float>((this->view_distance * 2) + 1);
+    auto max =
+        (this->position + (glm::vec3(CHUNK_WIDTH, 0.0f, CHUNK_DEPTH) * dist));
+
+    // regenerate the sections that are out of bounds
+    ChunkSection *other;
     for (auto& section : this->sections) {
-        auto pos = section.get_position();
-        if ((pos.x < this->position.x ||
-             pos.x >= this->position.x + (CHUNK_WIDTH * dist)) ||
-            (pos.z < this->position.z ||
-             pos.z >= this->position.z + (CHUNK_DEPTH * dist))) {
-            section.generate(pos + (vdir * dist));
+        if (section.position.x < this->position.x ||
+            section.position.x >= max.x ||
+            section.position.z < this->position.z ||
+            section.position.z >= max.z) {
+            ASSERT((other = this->section_from_position(section.position + vdir)));
+            other->is_dirty = true;
+
+            section.generate(section.position + (vdir * dist));
+
+            ASSERT((other = this->section_from_position(section.position - vdir)));
+            other->is_dirty = true;
         }
     }
+}
+
+void Chunk::prepare_mesh(ChunkSection& section) {
+    uint32_t idx = 0;
+    size_t n = 0;
+    glm::vec3 position;
+    glm::vec3 normal;
+    glm::vec4 uv;
+
+    // destroy the previous mesh
+    section.mesh.clear();
+
+    for (size_t i = 0; i < CHUNK_VOLUME; i++) {
+        const auto& type = section.blocks.at(i);
+        if (type == BlockType::Air)
+            continue;
+
+        idx = static_cast<uint32_t>(type) - 1;
+        const auto& block = BLOCK_TABLE[idx];
+        position = section.position_from_index(i);
+        for (size_t j = 0; j < BLOCK_FACES; j++) {
+            normal = BLOCK_NORMALS[j];
+            if (!section.is_visible(position, normal))
+                continue;
+
+            auto other = this->section_from_position(position + normal);
+            if (other && !other->is_visible(position, normal))
+                continue;
+
+            if (fabs(normal.y) < 1.0f)
+                uv = renderer::texture::uv_coords(
+                        "atlas", static_cast<uint32_t>(block.front));
+            else
+                uv = renderer::texture::uv_coords(
+                        "atlas", static_cast<uint32_t>(block.top));
+
+            section.mesh_block_face(
+                    position - section.position, normal, uv, j, n++);
+        }
+    }
+
+    section.mesh.allocate(false);
+    section.mesh.submit();
+
+    section.is_dirty = false;
+}
+
+ChunkSection *Chunk::section_from_position(glm::vec3 position) {
+    ChunkSection *section = nullptr;
+    for (auto& tmp : this->sections) {
+        if (tmp.contains(position)) {
+            section = &tmp;
+            break;
+        }
+    }
+
+    return section;
 }

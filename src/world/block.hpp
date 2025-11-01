@@ -9,6 +9,7 @@ constexpr size_t BLOCK_FACES = 6;
 
 constexpr uint32_t BLOCK_SOLID = (1 << 0);
 constexpr uint32_t BLOCK_ANIMATED = (1 << 1);
+constexpr uint32_t BLOCK_TRANSPARENT = (1 << 2);
 
 enum class BlockType {
     Air = 0,
