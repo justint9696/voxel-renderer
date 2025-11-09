@@ -5,3 +5,4 @@
 -Ilib/glfw/include
 -Ilib/glm
 -Ilib/stb
+-Ilib/noise

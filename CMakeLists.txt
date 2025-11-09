@@ -25,10 +25,13 @@ target_include_directories(glad PRIVATE lib/glad/include)
 add_subdirectory(lib/glfw)
 add_subdirectory(lib/glm)
 
+add_library(noise INTERFACE lib/noise)
+
 target_link_libraries(game
     glad
     glfw
     glm
+    noise
 )
 
 target_include_directories(game PRIVATE
@@ -36,5 +39,6 @@ target_include_directories(game PRIVATE
     lib/glfw/include
     lib/glm
     lib/stb
+    lib/noise
     src
 )
