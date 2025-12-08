@@ -2,6 +2,7 @@
 
 #include "renderer/renderer.hpp"
 #include "logger.hpp"
+#include "time.hpp"
 
 #include <cmath>
 
@@ -9,6 +10,7 @@ Chunk::Chunk(glm::vec3 position, uint32_t view_distance) :
         position(position), view_distance(view_distance) {
     size_t nchunks = (view_distance * 2) + 1;
 
+    this->perlin.reseed(util::time::now());
     this->sections.reserve(std::pow(nchunks, 2));
     lg::info("Creating {} chunk sections", std::pow(nchunks, 2));
 
@@ -17,7 +19,8 @@ Chunk::Chunk(glm::vec3 position, uint32_t view_distance) :
         for (int32_t z = 0; z < nchunks; z++) {
             pos = this->position +
                   glm::vec3(x * CHUNK_WIDTH, 0.0f, z * CHUNK_DEPTH);
-            this->sections.emplace_back(pos);
+            auto& section = this->sections.emplace_back(pos);
+            this->generate(section, pos);
         }
     }
 
@@ -111,7 +114,7 @@ void Chunk::swap(glm::vec3 position) {
             ASSERT((other = this->section_from_position(section.position + vdir)));
             other->is_dirty = true;
 
-            section.generate(section.position + (vdir * dist));
+            this->generate(section, section.position + (vdir * dist));
 
             ASSERT((other = this->section_from_position(section.position - vdir)));
             other->is_dirty = true;
@@ -174,4 +177,37 @@ ChunkSection *Chunk::section_from_position(glm::vec3 position) {
     }
 
     return section;
+}
+
+void Chunk::generate(ChunkSection& section, glm::vec3 position) {
+    lg::trace("Generating chunk at ({}, {}, {})",
+            position.x, position.y, position.z);
+    ChunkParams params;
+
+    section.blocks.clear();
+    for (size_t x = 0; x < CHUNK_WIDTH; x++) {
+        for (size_t z = 0; z < CHUNK_DEPTH; z++) {
+            this->params_at(params, position.x + x, position.z + z);
+            for (size_t y = 0; y < CHUNK_HEIGHT; y++) {
+                if (y >= params.height) {
+                    section.blocks.emplace_back(BlockType::Air);
+                } else if (y == params.height - 1) {
+                    section.blocks.emplace_back(BlockType::Grass);
+                } else if (y >= params.height - 3) {
+                    section.blocks.emplace_back(BlockType::Dirt);
+                } else {
+                    section.blocks.emplace_back(BlockType::Stone);
+                }
+            }
+        }
+    }
+
+    section.position = position;
+    section.is_dirty = true;
+}
+
+void Chunk::params_at(ChunkParams& params, float x, float z) {
+    float height =
+        CHUNK_HEIGHT * this->perlin.octave2D_01(x * 0.01f, z * 0.01f, 3);
+    params.height = ceilf(fmaxf(fminf(height, CHUNK_HEIGHT), 1));
 }

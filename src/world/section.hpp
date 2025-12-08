@@ -10,9 +10,13 @@ constexpr int32_t CHUNK_HEIGHT = 128;
 constexpr int32_t CHUNK_DEPTH = 16;
 constexpr int32_t CHUNK_VOLUME = (CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_DEPTH);
 
+struct ChunkParams {
+    uint32_t height;
+};
+
 class ChunkSection {
 public:
-    bool is_dirty = true;
+    bool is_dirty = false;
     glm::vec3 position;
     ChunkMesh mesh;
     std::vector<BlockType> blocks;
@@ -33,9 +37,6 @@ public:
 
     // Determines if a position is contained in the section
     bool contains(glm::vec3 position);
-
-    // Generates the chunk section
-    void generate(glm::vec3 position);
 
     // Determines if a face is visible within the mesh
     bool is_visible(glm::vec3 position, glm::vec3 normal);
