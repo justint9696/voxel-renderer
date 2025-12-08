@@ -7,7 +7,8 @@
 #include <glm/ext.hpp>
 #include <cmath>
 
-ChunkSection::ChunkSection(glm::vec3 position) : position(position) {
+ChunkSection::ChunkSection(glm::vec3 position) :
+        position(position), regen_position(position) {
     this->mesh.init();
     this->blocks.reserve(CHUNK_VOLUME);
 }

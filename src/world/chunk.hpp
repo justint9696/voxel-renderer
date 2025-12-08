@@ -6,6 +6,7 @@
 #include <PerlinNoise.hpp>
 #include <glm/vec3.hpp>
 
+#include <queue>
 #include <vector>
 
 constexpr uint32_t MESH_PER_FRAME = 1;
@@ -38,6 +39,9 @@ private:
 
     // Perlin noise
     siv::PerlinNoise perlin;
+
+    // Chunk section queue
+    std::deque<ChunkSection *> queue;
 
     uint32_t mesh_count;
     uint32_t view_distance;

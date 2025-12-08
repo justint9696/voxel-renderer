@@ -5,6 +5,9 @@
 
 #include <glm/vec4.hpp>
 
+constexpr int32_t CHUNK_DIRTY = (1 << 0);
+constexpr int32_t CHUNK_REGEN = (1 << 1);
+
 constexpr int32_t CHUNK_WIDTH = 16;
 constexpr int32_t CHUNK_HEIGHT = 128;
 constexpr int32_t CHUNK_DEPTH = 16;
@@ -16,8 +19,9 @@ struct ChunkParams {
 
 class ChunkSection {
 public:
-    bool is_dirty = false;
+    uint32_t flags = 0;
     glm::vec3 position;
+    glm::vec3 regen_position;
     ChunkMesh mesh;
     std::vector<BlockType> blocks;
 
