@@ -19,7 +19,7 @@ public:
 
     void update_view_matrix();
 
-    const glm::vec2& get_viewport() const {
+    const glm::ivec2& get_viewport() const {
         return this->viewport;
     }
 
@@ -27,7 +27,7 @@ protected:
     float fov;
     float yaw = -90.0f;
     float pitch = 0.0f;
-    glm::vec2 viewport;
+    glm::ivec2 viewport;
     glm::vec3 up;
     glm::vec3 right;
     glm::vec3 forward;
