@@ -6,6 +6,7 @@
 
 class ChunkMesh {
 public:
+    float vram = 0.0f;
     std::vector<glm::vec3> vertices;
     std::vector<glm::vec2> uvs;
     std::vector<glm::vec3> normals;

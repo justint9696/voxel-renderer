@@ -16,6 +16,7 @@ struct State {
     time_t last_second = 0;
     time_t last_tick = 0;
     time_t last_frame = 0;
+    time_t ticks = 0;
     uint32_t fps = 0;
     uint32_t tps = 0;
     World world;
@@ -69,6 +70,7 @@ int main(int argc, char *argv[]) {
         while ((g_state.now - g_state.last_tick) > NS_PER_TICK) {
             tick(fixed_dt);
             g_state.last_tick += NS_PER_TICK;
+            g_state.ticks++;
             g_state.tps++;
         }
 
@@ -76,13 +78,22 @@ int main(int argc, char *argv[]) {
 
         renderer::font::draw(
                 "default", { 0, -10 }, 8.0f,
-                "Position: ({:.0f}, {:.0f}, {:.0f})",
+                "Position: ({:.3f}, {:.3f}, {:.3f})",
                 g_state.world.camera.position.x,
                 g_state.world.camera.position.y,
                 g_state.world.camera.position.z);
         renderer::font::draw(
                 "default", { 0, -20 }, 8.0f,
-                "The quick brown fox jumped over the lazy dog");
+                "Chunks: {}", g_state.world.nchunks);
+        renderer::font::draw(
+                "default", { 0, -30 }, 8.0f,
+                "VRAM: {:.2f}MB", g_state.world.chunk.vram);
+        renderer::font::draw(
+                "default", { 0, -40 }, 8.0f,
+                "Queued Chunks: {}", g_state.world.chunk.queued());
+        renderer::font::draw(
+                "default", { 0, -50 }, 8.0f,
+                "Game Tick: {}", g_state.ticks);
 
         update(dt);
         render();

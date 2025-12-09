@@ -21,7 +21,8 @@ void ChunkMesh::allocate(bool dynamic) {
                  ((dynamic) ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW));
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    lg::trace("Allocated {:.2f} MB for mesh", (nbytes / 1000000.0f));
+    this->vram = static_cast<float>(nbytes * 1e-6);
+    lg::trace("Allocated {:.2f} MB for mesh", this->vram);
 }
 
 void ChunkMesh::submit() {

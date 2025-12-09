@@ -13,6 +13,10 @@ constexpr uint32_t MESH_PER_FRAME = 1;
 
 class Chunk {
 public:
+    float vram = 0.0f;
+    uint32_t view_distance;
+
+public:
     Chunk() = default;
     ~Chunk() = default;
 
@@ -21,6 +25,10 @@ public:
     void tick(float dt);
     void update(float dt);
     void render(const Camera& cam);
+
+    size_t queued() const {
+        return this->queue.size();
+    }
 
     // Returns the center of the chunk
     glm::vec3 center(void) const;
@@ -44,7 +52,6 @@ private:
     std::deque<ChunkSection *> queue;
 
     uint32_t mesh_count;
-    uint32_t view_distance;
 
 private:
     // Prepares the chunk mesh for rendering

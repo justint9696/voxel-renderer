@@ -5,6 +5,7 @@
 
 class World {
 public:
+    size_t nchunks;
     Chunk chunk;
     PerspectiveCamera camera;
 

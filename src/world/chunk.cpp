@@ -146,6 +146,7 @@ void Chunk::prepare_mesh(ChunkSection& section) {
     glm::vec4 uv;
 
     // destroy the previous mesh
+    this->vram -= section.mesh.vram;
     section.mesh.clear();
 
     ASSERT(section.blocks.size());
@@ -182,6 +183,8 @@ void Chunk::prepare_mesh(ChunkSection& section) {
     section.mesh.submit();
 
     section.flags &= ~CHUNK_DIRTY;
+
+    this->vram += section.mesh.vram;
 }
 
 ChunkSection *Chunk::section_from_position(glm::vec3 position) {

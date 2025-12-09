@@ -4,9 +4,9 @@
 
 constexpr glm::ivec2 SCREEN_SIZE = { 1280, 720 };
 
-World::World(glm::vec3 pos) :
-        chunk(pos) {
+World::World(glm::vec3 pos) : chunk(pos) {
     this->camera = PerspectiveCamera(this->chunk.center(), 90.0f, SCREEN_SIZE);
+    this->nchunks = std::pow((this->chunk.view_distance * 2) + 1, 2);
 }
 
 void World::update(float dt) {
