@@ -9,6 +9,8 @@ void keyboard_callback(GLFWwindow *window, int key, int scancode, int action,
 
 void mouse_callback(GLFWwindow *window, double x, double y);
 
+void window_size_callback(GLFWwindow *window, int width, int height);
+
 Window::Window(glm::vec2 size, const std::string& title) : size(size) {
     if ((this->handle = glfwCreateWindow(
                     size.x, size.y, title.c_str(), NULL, NULL)) == NULL) {
@@ -19,6 +21,7 @@ Window::Window(glm::vec2 size, const std::string& title) : size(size) {
     glfwSetInputMode(this->handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetKeyCallback(this->handle, keyboard_callback);
     glfwSetCursorPosCallback(this->handle, mouse_callback);
+    glfwSetFramebufferSizeCallback(this->handle, window_size_callback);
 }
 
 void keyboard_callback(GLFWwindow *window, int key, int scancode, int action,
@@ -34,4 +37,8 @@ void mouse_callback(GLFWwindow *window, double x, double y) {
     } else {
         input::mouse::update({ x, y });
     }
+}
+
+void window_size_callback(GLFWwindow *window, int width, int height) {
+    glViewport(0, 0, width, height);
 }
