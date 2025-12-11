@@ -15,7 +15,7 @@ ChunkSection::ChunkSection(glm::vec3 position) :
 
 void ChunkSection::render(void) {
     auto& shader = renderer::shader::get("default");
-    auto model = glm::translate(glm::mat4(1.0f), this->position);
+    auto model = glm::translate(glm::mat4(1.0f), this->regen_position);
     shader.set<glm::mat4>("u_model", model);
 
     this->mesh.render();

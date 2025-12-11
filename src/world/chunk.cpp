@@ -48,6 +48,7 @@ void Chunk::tick(float dt) {
         if (section->flags & CHUNK_REGEN) {
             this->regenerate(*section);
         } else if (section->flags & CHUNK_DIRTY) {
+            section->regen_position = section->position;
             this->prepare_mesh(*section);
         }
     }
@@ -127,11 +128,12 @@ void Chunk::swap(glm::vec3 position) {
             other->flags |= CHUNK_DIRTY;
             this->queue.push_back(other);
 
-            section.regen_position = section.position + (vdir * dist);
+            section.regen_position = section.position;
+            section.position += (vdir * dist);
             section.flags |= CHUNK_REGEN;
             this->queue.push_front(&section);
 
-            ASSERT((other = this->section_from_position(section.regen_position - vdir)));
+            ASSERT((other = this->section_from_position(section.position - vdir)));
             other->flags |= CHUNK_DIRTY;
             this->queue.push_back(other);
         }
@@ -226,8 +228,7 @@ void Chunk::generate(ChunkSection& section, glm::vec3 position) {
 }
 
 void Chunk::regenerate(ChunkSection& section) {
-    this->generate(section, section.regen_position);
-    this->prepare_mesh(section);
+    this->generate(section, section.position);
 
     section.flags &= ~CHUNK_REGEN;
     section.flags |= CHUNK_DIRTY;

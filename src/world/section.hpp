@@ -5,13 +5,13 @@
 
 #include <glm/vec4.hpp>
 
-constexpr int32_t CHUNK_DIRTY = (1 << 0);
-constexpr int32_t CHUNK_REGEN = (1 << 1);
+constexpr uint32_t CHUNK_DIRTY = (1 << 0);
+constexpr uint32_t CHUNK_REGEN = (1 << 1);
 
-constexpr int32_t CHUNK_WIDTH = 16;
-constexpr int32_t CHUNK_HEIGHT = 128;
-constexpr int32_t CHUNK_DEPTH = 16;
-constexpr int32_t CHUNK_VOLUME = (CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_DEPTH);
+constexpr uint32_t CHUNK_WIDTH = 16;
+constexpr uint32_t CHUNK_HEIGHT = 256;
+constexpr uint32_t CHUNK_DEPTH = 16;
+constexpr uint32_t CHUNK_VOLUME = (CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_DEPTH);
 
 struct ChunkParams {
     uint32_t height;

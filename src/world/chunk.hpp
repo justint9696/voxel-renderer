@@ -26,7 +26,7 @@ public:
     void update(float dt);
     void render(const Camera& cam);
 
-    size_t queued() const {
+    inline size_t queued() const {
         return this->queue.size();
     }
 
