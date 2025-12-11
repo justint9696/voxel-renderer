@@ -10,10 +10,14 @@
 #include <vector>
 
 constexpr uint32_t MESH_PER_FRAME = 1;
+constexpr uint32_t MESH_TIME_MAX = 50;
 
 class Chunk {
 public:
     float vram = 0.0f;
+    uint32_t mesh_idx;
+    float avg_mesh = 0.0f;
+    time_t mesh_time[MESH_TIME_MAX];
     uint32_t view_distance;
 
 public:
@@ -28,6 +32,10 @@ public:
 
     inline size_t queued() const {
         return this->queue.size();
+    }
+
+    inline float mesh_avg() {
+        return this->avg_mesh;
     }
 
     // Returns the center of the chunk

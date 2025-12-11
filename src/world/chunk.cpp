@@ -52,6 +52,14 @@ void Chunk::tick(float dt) {
             this->prepare_mesh(*section);
         }
     }
+
+    for (size_t i = 0; i < MESH_TIME_MAX; i++)
+        this->avg_mesh += this->mesh_time[i];
+
+    this->avg_mesh = (this->avg_mesh / MESH_TIME_MAX) * 1e-6;
+
+    this->mesh_time[this->mesh_idx] = 0;
+    this->mesh_idx = ((this->mesh_idx + 1) % MESH_TIME_MAX);
 }
 
 void Chunk::render(const Camera& cam) {
@@ -146,10 +154,14 @@ void Chunk::prepare_mesh(ChunkSection& section) {
     glm::vec3 position;
     glm::vec3 normal;
     glm::vec4 uv;
+    time_t start;
+    time_t end;
 
     // destroy the previous mesh
     this->vram -= section.mesh.vram;
     section.mesh.clear();
+
+    start = util::time::now();
 
     ASSERT(section.blocks.size());
     for (size_t i = 0; i < CHUNK_VOLUME; i++) {
@@ -187,6 +199,10 @@ void Chunk::prepare_mesh(ChunkSection& section) {
     section.flags &= ~CHUNK_DIRTY;
 
     this->vram += section.mesh.vram;
+
+    end = util::time::now();
+    this->mesh_time[this->mesh_idx] = (end - start);
+    this->mesh_idx = ((this->mesh_idx + 1) % MESH_TIME_MAX);
 }
 
 ChunkSection *Chunk::section_from_position(glm::vec3 position) {

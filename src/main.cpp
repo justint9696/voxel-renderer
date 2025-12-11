@@ -93,6 +93,9 @@ int main(int argc, char *argv[]) {
                 "Queued Chunks: {}", g_state.world.chunk.queued());
         renderer::font::draw(
                 "default", { 0, -50 }, 8.0f,
+                "Mesh Time Avg: {:.3f}ms", g_state.world.chunk.mesh_avg());
+        renderer::font::draw(
+                "default", { 0, -60 }, 8.0f,
                 "Game Tick: {}", g_state.ticks);
 
         update(dt);
