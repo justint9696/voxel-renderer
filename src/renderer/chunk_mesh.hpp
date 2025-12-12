@@ -11,6 +11,7 @@ public:
     std::vector<glm::vec2> uvs;
     std::vector<glm::vec3> normals;
     std::vector<uint32_t> indices;
+    std::vector<float> opacity;
 
 public:
     ChunkMesh() = default;

@@ -16,6 +16,7 @@ enum class BlockType {
     Grass,
     Dirt,
     Stone,
+    Water,
 };
 
 enum class BlockTexture {
@@ -23,6 +24,7 @@ enum class BlockTexture {
     Grass1,
     Dirt0,
     Stone0,
+    Water0 = 16,
 };
 
 struct Block {

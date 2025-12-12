@@ -4,6 +4,7 @@ const Block BLOCK_TABLE[] = {
     { BlockTexture::Grass0, BlockTexture::Grass1, BLOCK_SOLID, 0, 1.0f },
     { BlockTexture::Dirt0, BlockTexture::Dirt0, BLOCK_SOLID, 0, 1.0f },
     { BlockTexture::Stone0, BlockTexture::Stone0, BLOCK_SOLID, 0, 1.0f },
+    { BlockTexture::Water0, BlockTexture::Water0, BLOCK_TRANSPARENT, 0, 0.5f },
 };
 
 const glm::vec3 BLOCK_VERTICES[] = {

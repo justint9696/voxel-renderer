@@ -15,6 +15,7 @@ void ChunkMesh::allocate(bool dynamic) {
     nbytes += sizeof(glm::vec3) * this->vertices.size();
     nbytes += sizeof(glm::vec2) * this->uvs.size();
     nbytes += sizeof(glm::vec3) * this->normals.size();
+    nbytes += sizeof(float) * this->opacity.size();
     
     glBindBuffer(GL_ARRAY_BUFFER, this->vbo);
     glBufferData(GL_ARRAY_BUFFER, nbytes, nullptr,
@@ -52,6 +53,13 @@ void ChunkMesh::submit() {
                           (void *)offset);
     glEnableVertexAttribArray(2);
 
+    offset += size;
+    size = this->opacity.size() * sizeof(float);
+    glBufferSubData(GL_ARRAY_BUFFER, offset, size, this->opacity.data());
+    glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(float),
+                          (void *)offset);
+    glEnableVertexAttribArray(3);
+
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->ibo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,
                  this->indices.size() * sizeof(uint32_t),
@@ -80,4 +88,5 @@ void ChunkMesh::clear() {
     this->uvs.clear();
     this->normals.clear();
     this->indices.clear();
+    this->opacity.clear();
 }

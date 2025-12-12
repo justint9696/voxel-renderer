@@ -172,8 +172,18 @@ void Chunk::prepare_mesh(ChunkSection& section) {
         idx = static_cast<uint32_t>(type) - 1;
         const auto& block = BLOCK_TABLE[idx];
         position = section.position_from_index(i);
+
+        // only mesh the topmost water block in bodies of water
+        if (type == BlockType::Water && position.y < CHUNK_WATER_HEIGHT - 1)
+            continue;
+
         for (size_t j = 0; j < BLOCK_FACES; j++) {
             normal = BLOCK_NORMALS[j];
+
+            // only mesh the top face of water blocks
+            if (type == BlockType::Water && normal.y < 1.0f)
+                continue;
+
             if (!section.is_visible(position, normal))
                 continue;
 
@@ -188,8 +198,8 @@ void Chunk::prepare_mesh(ChunkSection& section) {
                 uv = renderer::texture::uv_coords(
                         "atlas", static_cast<uint32_t>(block.top));
 
-            section.mesh_block_face(
-                    position - section.position, normal, uv, j, n++);
+            section.mesh_block_face(section.mesh, position - section.position, normal,
+                                    uv, block.opacity, j, n++);
         }
     }
 
@@ -228,7 +238,11 @@ void Chunk::generate(ChunkSection& section, glm::vec3 position) {
             this->params_at(params, position.x + x, position.z + z);
             for (size_t y = 0; y < CHUNK_HEIGHT; y++) {
                 if (y >= params.height) {
-                    section.blocks.emplace_back(BlockType::Air);
+                    if (y < CHUNK_WATER_HEIGHT) {
+                        section.blocks.emplace_back(BlockType::Water);
+                    } else {
+                        section.blocks.emplace_back(BlockType::Air);
+                    }
                 } else if (y == params.height - 1) {
                     section.blocks.emplace_back(BlockType::Grass);
                 } else if (y >= params.height - 3) {

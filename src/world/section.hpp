@@ -13,6 +13,8 @@ constexpr uint32_t CHUNK_HEIGHT = 256;
 constexpr uint32_t CHUNK_DEPTH = 16;
 constexpr uint32_t CHUNK_VOLUME = (CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_DEPTH);
 
+constexpr uint32_t CHUNK_WATER_HEIGHT = static_cast<uint32_t>(CHUNK_HEIGHT / 2.0f);
+
 struct ChunkParams {
     uint32_t height;
 };
@@ -46,9 +48,6 @@ public:
     bool is_visible(glm::vec3 position, glm::vec3 normal);
 
     // Adds a block face to the mesh
-    void mesh_block_face(glm::vec3 position, glm::vec3 normal, glm::vec4 uv,
-                         uint32_t idx, size_t n);
-
-    // Returns the maximum height for the given (x,z) coordinates
-    uint32_t max_terrain_height(uint32_t x, uint32_t z);
+    void mesh_block_face(ChunkMesh& mesh, glm::vec3 position, glm::vec3 normal,
+                         glm::vec4 uv, float opacity, uint32_t idx, size_t n);
 };

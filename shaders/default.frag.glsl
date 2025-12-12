@@ -2,6 +2,7 @@
 
 in vec2 o_uv;
 in vec3 o_normal;
+in float o_opacity;
 
 uniform vec4 u_color;
 uniform sampler2D u_texture;
@@ -13,5 +14,5 @@ void main() {
     float diff = max(abs(dot(o_normal, light)), 0.0f);
     vec3 sample = texture(u_texture, o_uv).rgb;
     vec3 diffuse = diff * sample;
-    frag_color = vec4(mix(diffuse, u_color.rgb, 0.1f), 1.0f);
+    frag_color = vec4(mix(diffuse, u_color.rgb, 0.1f), o_opacity);
 }

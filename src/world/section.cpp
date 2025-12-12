@@ -52,22 +52,19 @@ int32_t ChunkSection::index_from_position(glm::vec3 position) {
     return idx;
 }
 
-uint32_t ChunkSection::max_terrain_height(uint32_t x, uint32_t z) {
-    return CHUNK_HEIGHT;
-}
-
-void ChunkSection::mesh_block_face(glm::vec3 position, glm::vec3 normal,
-                                   glm::vec4 uv, uint32_t idx, size_t n) {
+void ChunkSection::mesh_block_face(ChunkMesh& mesh, glm::vec3 position,
+                                   glm::vec3 normal, glm::vec4 uv, float opacity,
+                                   uint32_t idx, size_t n) {
     // push the vertices
     for (size_t i = 0; i < 4; i++) {
         const auto& vertex = BLOCK_VERTICES[i + (idx * 4)];
-        this->mesh.vertices.emplace_back(position + vertex);
+        mesh.vertices.emplace_back(position + vertex);
     }
 
     // push the uv coordinates
     for (size_t i = 0; i < 4; i++) {
         const auto& uvs = BLOCK_UVS[i];
-        this->mesh.uvs.emplace_back(
+        mesh.uvs.emplace_back(
             ((uvs.x < 1.0f) ? uv.x : uv.z),
             ((uvs.y < 1.0f) ? uv.y : uv.w)
         );
@@ -75,14 +72,19 @@ void ChunkSection::mesh_block_face(glm::vec3 position, glm::vec3 normal,
 
     // push the normals
     for (size_t i = 0; i < 4; i++) {
-        this->mesh.normals.emplace_back(normal);
+        mesh.normals.emplace_back(normal);
+    }
+
+    // push the opacity vaules
+    for (size_t i = 0; i < 4; i++) {
+        mesh.opacity.emplace_back(opacity);
     }
 
     // push the indices
     size_t lo = ((idx < 3) ? 0 : 6);
     size_t hi = ((idx < 3) ? 6 : 12);
     for (size_t i = lo; i < hi; i++) {
-        this->mesh.indices.emplace_back(BLOCK_INDICES[i] + (n * 4));
+        mesh.indices.emplace_back(BLOCK_INDICES[i] + (n * 4));
     }
 }
 
@@ -92,7 +94,7 @@ bool ChunkSection::is_visible(glm::vec3 position, glm::vec3 normal) {
         return true;
 
     auto& type = this->blocks.at(idx);
-    auto& block = BLOCK_TABLE[static_cast<uint32_t>(type)];
+    auto& block = BLOCK_TABLE[static_cast<uint32_t>(type) - 1];
 
     return ((type == BlockType::Air) || (block.flags & BLOCK_TRANSPARENT));
 }
