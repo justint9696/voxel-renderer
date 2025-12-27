@@ -9,7 +9,8 @@
 
 ChunkSection::ChunkSection(glm::vec3 position) :
         position(position), regen_position(position) {
-    this->mesh.init();
+    this->solid.init();
+    this->transparent.init();
     this->blocks.reserve(CHUNK_VOLUME);
 }
 
@@ -18,7 +19,8 @@ void ChunkSection::render(void) {
     auto model = glm::translate(glm::mat4(1.0f), this->regen_position);
     shader.set<glm::mat4>("u_model", model);
 
-    this->mesh.render();
+    this->solid.render();
+    this->transparent.render();
 }
 
 glm::vec3 ChunkSection::position_from_index(uint32_t idx) {
@@ -56,35 +58,24 @@ void ChunkSection::mesh_block_face(ChunkMesh& mesh, glm::vec3 position,
                                    glm::vec3 normal, glm::vec4 uv, float opacity,
                                    uint32_t idx, size_t n) {
     // push the vertices
-    for (size_t i = 0; i < 4; i++) {
-        const auto& vertex = BLOCK_VERTICES[i + (idx * 4)];
-        mesh.vertices.emplace_back(position + vertex);
-    }
+    for (size_t i = 0; i < 6; i++) {
+        // determine the face index
+        uint32_t index = ((idx < 3) ? BLOCK_INDICES[i] :
+                                      BLOCK_INDICES[i+6]);
 
-    // push the uv coordinates
-    for (size_t i = 0; i < 4; i++) {
-        const auto& uvs = BLOCK_UVS[i];
-        mesh.uvs.emplace_back(
-            ((uvs.x < 1.0f) ? uv.x : uv.z),
-            ((uvs.y < 1.0f) ? uv.y : uv.w)
-        );
-    }
+        // get the vertex position from the index
+        const auto& vertex = BLOCK_VERTICES[index + (idx * 4)];
+        const auto& uvs = BLOCK_UVS[index];
 
-    // push the normals
-    for (size_t i = 0; i < 4; i++) {
-        mesh.normals.emplace_back(normal);
-    }
-
-    // push the opacity vaules
-    for (size_t i = 0; i < 4; i++) {
-        mesh.opacity.emplace_back(opacity);
-    }
-
-    // push the indices
-    size_t lo = ((idx < 3) ? 0 : 6);
-    size_t hi = ((idx < 3) ? 6 : 12);
-    for (size_t i = lo; i < hi; i++) {
-        mesh.indices.emplace_back(BLOCK_INDICES[i] + (n * 4));
+        mesh.vertices.emplace_back((ChunkVertex) {
+            .position = (position + vertex),
+            .uv = {
+                ((uvs.x < 1.0f) ? uv.x : uv.z),
+                ((uvs.y < 1.0f) ? uv.y : uv.w)
+            },
+            .normal = normal,
+            .opacity = opacity,
+        });
     }
 }
 

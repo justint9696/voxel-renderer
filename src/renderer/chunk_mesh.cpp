@@ -7,15 +7,32 @@
 void ChunkMesh::init() {
     glGenVertexArrays(1, &this->vao);
     glGenBuffers(1, &this->vbo);
-    glGenBuffers(1, &this->ibo);
+
+    glBindVertexArray(this->vao);
+    glBindBuffer(GL_ARRAY_BUFFER, this->vbo);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(ChunkVertex),
+                          (void *)offsetof(ChunkVertex, position));
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(ChunkVertex),
+                          (void *)offsetof(ChunkVertex, uv));
+    glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(ChunkVertex),
+                          (void *)offsetof(ChunkVertex, normal));
+    glEnableVertexAttribArray(2);
+
+    glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(ChunkVertex),
+                          (void *)offsetof(ChunkVertex, opacity));
+    glEnableVertexAttribArray(3);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 }
 
 void ChunkMesh::allocate(bool dynamic) {
-    size_t nbytes = 0;
-    nbytes += sizeof(glm::vec3) * this->vertices.size();
-    nbytes += sizeof(glm::vec2) * this->uvs.size();
-    nbytes += sizeof(glm::vec3) * this->normals.size();
-    nbytes += sizeof(float) * this->opacity.size();
+    size_t nbytes = sizeof(ChunkVertex) * this->vertices.size();
     
     glBindBuffer(GL_ARRAY_BUFFER, this->vbo);
     glBufferData(GL_ARRAY_BUFFER, nbytes, nullptr,
@@ -27,66 +44,28 @@ void ChunkMesh::allocate(bool dynamic) {
 }
 
 void ChunkMesh::submit() {
-    size_t size = 0;
-    off_t offset = 0;
-
     glBindVertexArray(this->vao);
     glBindBuffer(GL_ARRAY_BUFFER, this->vbo);
 
-    size = this->vertices.size() * sizeof(glm::vec3);
-    glBufferSubData(GL_ARRAY_BUFFER, offset, size, this->vertices.data());
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3),
-                          (void *)offset);
-    glEnableVertexAttribArray(0);
+    glBufferSubData(GL_ARRAY_BUFFER, 0,
+                    sizeof(ChunkVertex) * this->vertices.size(),
+                    this->vertices.data());
 
-    offset += size;
-    size = this->uvs.size() * sizeof(glm::vec2);
-    glBufferSubData(GL_ARRAY_BUFFER, offset, size, this->uvs.data());
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2),
-                          (void *)offset);
-    glEnableVertexAttribArray(1);
-
-    offset += size;
-    size = this->normals.size() * sizeof(glm::vec3);
-    glBufferSubData(GL_ARRAY_BUFFER, offset, size, this->normals.data());
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3),
-                          (void *)offset);
-    glEnableVertexAttribArray(2);
-
-    offset += size;
-    size = this->opacity.size() * sizeof(float);
-    glBufferSubData(GL_ARRAY_BUFFER, offset, size, this->opacity.data());
-    glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(float),
-                          (void *)offset);
-    glEnableVertexAttribArray(3);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                 this->indices.size() * sizeof(uint32_t),
-                 this->indices.data(),
-                 GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    lg::trace("Created mesh from {} vertices, {} uvs, {} normals, and {} indices",
-              this->vertices.size(), 
-              this->uvs.size(),
-              this->normals.size(),
-              this->indices.size());
+    lg::debug("Created mesh from {} vertices", this->vertices.size());
 }
 
 void ChunkMesh::render() {
     glBindVertexArray(this->vao);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->ibo);
-    glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0);
+    glDrawArrays(GL_TRIANGLES, 0, this->vertices.size());
+    glBindVertexArray(0);
 }
 
 void ChunkMesh::clear() {
     this->vertices.clear();
-    this->uvs.clear();
-    this->normals.clear();
-    this->indices.clear();
-    this->opacity.clear();
+}
+
+void ChunkMesh::sort(const Camera& cam) {
 }

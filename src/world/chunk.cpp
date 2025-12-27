@@ -157,13 +157,15 @@ void Chunk::prepare_mesh(ChunkSection& section) {
     time_t start;
     time_t end;
 
-    // destroy the previous mesh
-    this->vram -= section.mesh.vram;
-    section.mesh.clear();
+    // destroy the previous meshes
+    this->vram -= section.solid.vram + section.transparent.vram;
+
+    section.solid.clear();
+    section.transparent.clear();
 
     start = util::time::now();
 
-    ASSERT(section.blocks.size());
+    ASSERT(section.blocks.size() > 0);
     for (size_t i = 0; i < CHUNK_VOLUME; i++) {
         const auto& type = section.blocks.at(i);
         if (type == BlockType::Air)
@@ -176,6 +178,9 @@ void Chunk::prepare_mesh(ChunkSection& section) {
         // only mesh the topmost water block in bodies of water
         if (type == BlockType::Water && position.y < CHUNK_WATER_HEIGHT - 1)
             continue;
+
+        auto& mesh = ((block.flags & BLOCK_TRANSPARENT) ?
+                       section.transparent : section.solid);
 
         for (size_t j = 0; j < BLOCK_FACES; j++) {
             normal = BLOCK_NORMALS[j];
@@ -198,17 +203,21 @@ void Chunk::prepare_mesh(ChunkSection& section) {
                 uv = renderer::texture::uv_coords(
                         "atlas", static_cast<uint32_t>(block.top));
 
-            section.mesh_block_face(section.mesh, position - section.position, normal,
+            section.mesh_block_face(mesh, position - section.position, normal,
                                     uv, block.opacity, j, n++);
         }
     }
 
-    section.mesh.allocate(false);
-    section.mesh.submit();
+    section.solid.allocate(false);
+    section.solid.submit();
+
+    section.transparent.allocate(true);
+    section.transparent.submit();
 
     section.flags &= ~CHUNK_DIRTY;
 
-    this->vram += section.mesh.vram;
+    this->vram += section.solid.vram;
+    this->vram += section.transparent.vram;
 
     end = util::time::now();
     this->mesh_time[this->mesh_idx] = (end - start);

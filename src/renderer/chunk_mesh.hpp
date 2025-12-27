@@ -1,17 +1,20 @@
 #pragma once
 
-#include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
+#include "game/camera.hpp"
+
 #include <vector>
+
+struct ChunkVertex {
+    glm::vec3 position;
+    glm::vec2 uv;
+    glm::vec3 normal;
+    float opacity;
+};
 
 class ChunkMesh {
 public:
     float vram = 0.0f;
-    std::vector<glm::vec3> vertices;
-    std::vector<glm::vec2> uvs;
-    std::vector<glm::vec3> normals;
-    std::vector<uint32_t> indices;
-    std::vector<float> opacity;
+    std::vector<ChunkVertex> vertices;
 
 public:
     ChunkMesh() = default;
@@ -32,8 +35,10 @@ public:
     // Clears the chunk mesh
     void clear();
 
+    // Sorts the mesh data
+    void sort(const Camera& cam);
+
 private:
     uint32_t vao;
     uint32_t vbo;
-    uint32_t ibo;
 };
