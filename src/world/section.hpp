@@ -24,7 +24,8 @@ public:
     uint32_t flags = 0;
     glm::vec3 position;
     glm::vec3 regen_position;
-    ChunkMesh mesh;
+    ChunkMesh solid;
+    ChunkMesh transparent;
     std::vector<BlockType> blocks;
 
 public:
@@ -50,4 +51,7 @@ public:
     // Adds a block face to the mesh
     void mesh_block_face(ChunkMesh& mesh, glm::vec3 position, glm::vec3 normal,
                          glm::vec4 uv, float opacity, uint32_t idx, size_t n);
+
+    // Returns the center of the chunk
+    glm::vec3 center(void) const;
 };

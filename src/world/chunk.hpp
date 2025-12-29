@@ -59,6 +59,7 @@ private:
     // Chunk section queue
     std::deque<ChunkSection *> queue;
 
+    bool sort;
     uint32_t mesh_count;
 
 private:

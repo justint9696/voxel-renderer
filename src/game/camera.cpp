@@ -7,7 +7,8 @@ constexpr float CAMERA_SPEED = 25.0f;
 constexpr float CAMERA_SENSITIVITY = 3.0f;
 
 Camera::Camera(glm::vec3 position, float fov, glm::vec2 viewport) :
-        position(position), fov(fov), viewport(viewport) {
+        position(position), prev_position(position),
+        fov(fov), viewport(viewport) {
     auto target = glm::vec3(0.0f);
     auto direction = glm::normalize(this->position - target);
     this->up = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -21,6 +22,7 @@ void Camera::tick(float dt) {
     auto& window = renderer::get_window();
     glfwGetFramebufferSize(window.handle, &viewport.x, &viewport.y);
 
+    this->prev_position = this->position;
     if (input::key_held(GLFW_KEY_W)) {
         this->position += this->forward * CAMERA_SPEED * dt;
     }

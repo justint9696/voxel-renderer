@@ -96,3 +96,7 @@ bool ChunkSection::contains(glm::vec3 position) {
             (this->position.z <= position.z &&
              this->position.z + CHUNK_DEPTH > position.z));
 }
+
+glm::vec3 ChunkSection::center(void) const {
+    return this->position + (glm::vec3(CHUNK_WIDTH, 0.0f, CHUNK_DEPTH) * 0.5f);
+}

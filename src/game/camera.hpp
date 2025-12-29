@@ -8,6 +8,7 @@ public:
     glm::mat4 view;
     glm::mat4 projection;
     glm::vec3 position;
+    glm::vec3 prev_position;
 
 public:
     Camera() = default;

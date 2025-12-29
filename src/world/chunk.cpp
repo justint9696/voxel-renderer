@@ -72,6 +72,19 @@ void Chunk::render(const Camera& cam) {
     shader.set<glm::mat4>("u_projection", cam.projection);
     shader.set<glm::vec4>("u_color", glm::vec4(1.0f));
 
+    if (cam.position != cam.prev_position) {
+        this->sort = true;
+    }
+
+    if (this->queue.empty() && this->sort) {
+        std::sort(this->sections.begin(), this->sections.end(),
+                [&cam](const ChunkSection& a, const ChunkSection& b) {
+                    return glm::distance(cam.position, a.center()) >
+                           glm::distance(cam.position, b.center());
+                });
+        this->sort = false;
+    }
+
     for (auto& section : this->sections) {
         section.render();
     }
@@ -159,6 +172,8 @@ void Chunk::prepare_mesh(ChunkSection& section) {
 
     // destroy the previous meshes
     this->vram -= section.solid.vram + section.transparent.vram;
+    this->nvertices -=
+        section.solid.vertices.size() + section.transparent.vertices.size();
 
     section.solid.clear();
     section.transparent.clear();
@@ -216,8 +231,9 @@ void Chunk::prepare_mesh(ChunkSection& section) {
 
     section.flags &= ~CHUNK_DIRTY;
 
-    this->vram += section.solid.vram;
-    this->vram += section.transparent.vram;
+    this->vram += section.solid.vram + section.transparent.vram;
+    this->nvertices += 
+        section.solid.vertices.size() + section.transparent.vertices.size();
 
     end = util::time::now();
     this->mesh_time[this->mesh_idx] = (end - start);
