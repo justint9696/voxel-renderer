@@ -57,9 +57,6 @@ void Chunk::tick(float dt) {
         this->avg_mesh += this->mesh_time[i];
 
     this->avg_mesh = (this->avg_mesh / MESH_TIME_MAX) * 1e-6;
-
-    this->mesh_time[this->mesh_idx] = 0;
-    this->mesh_idx = ((this->mesh_idx + 1) % MESH_TIME_MAX);
 }
 
 void Chunk::render(const Camera& cam) {

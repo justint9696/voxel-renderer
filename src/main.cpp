@@ -12,6 +12,7 @@ constexpr glm::ivec2 SCREEN_SIZE = { 1280, 720 };
 
 struct State {
     bool wireframe = false;
+    bool debug = false;
     time_t now;
     time_t last_second = 0;
     time_t last_tick = 0;
@@ -55,6 +56,10 @@ int main(int argc, char *argv[]) {
                           ((g_state.wireframe) ? GL_LINE : GL_FILL));
         }
 
+        if (input::key_pressed(GLFW_KEY_F12)) {
+            g_state.debug ^= 1;
+        }
+
         g_state.last_frame = g_state.now;
         g_state.now = util::time::now();
         dt = (1.0f * (g_state.now - g_state.last_frame) / NS_PER_SECOND);
@@ -76,27 +81,32 @@ int main(int argc, char *argv[]) {
 
         g_state.fps++;
 
-        renderer::font::draw(
-                "default", { 0, -10 }, 8.0f,
-                "Position: ({:.3f}, {:.3f}, {:.3f})",
-                g_state.world.camera.position.x,
-                g_state.world.camera.position.y,
-                g_state.world.camera.position.z);
-        renderer::font::draw(
-                "default", { 0, -20 }, 8.0f,
-                "Chunks: {}", g_state.world.nchunks);
-        renderer::font::draw(
-                "default", { 0, -30 }, 8.0f,
-                "VRAM: {:.2f}MB", g_state.world.chunk.vram);
-        renderer::font::draw(
-                "default", { 0, -40 }, 8.0f,
-                "Queued Chunks: {}", g_state.world.chunk.queued());
-        renderer::font::draw(
-                "default", { 0, -50 }, 8.0f,
-                "Mesh Time Avg: {:.3f}ms", g_state.world.chunk.mesh_avg());
-        renderer::font::draw(
-                "default", { 0, -60 }, 8.0f,
-                "Game Tick: {}", g_state.ticks);
+        if (g_state.debug) {
+            renderer::font::draw(
+                    "default", { 0, -10 }, 8.0f,
+                    "Position: ({:.3f}, {:.3f}, {:.3f})",
+                    g_state.world.camera.position.x,
+                    g_state.world.camera.position.y,
+                    g_state.world.camera.position.z);
+            renderer::font::draw(
+                    "default", { 0, -20 }, 8.0f,
+                    "Chunks: {}", g_state.world.nchunks);
+            renderer::font::draw(
+                    "default", { 0, -30 }, 8.0f,
+                    "VRAM: {:.2f}MB", g_state.world.chunk.vram);
+            renderer::font::draw(
+                    "default", { 0, -40 }, 8.0f,
+                    "Polygon Count: {}", g_state.world.chunk.nvertices / 3);
+            renderer::font::draw(
+                    "default", { 0, -50 }, 8.0f,
+                    "Queued Chunks: {}", g_state.world.chunk.queued());
+            renderer::font::draw(
+                    "default", { 0, -60 }, 8.0f,
+                    "Mesh Time Avg: {:.3f}ms", g_state.world.chunk.mesh_avg());
+            renderer::font::draw(
+                    "default", { 0, -70 }, 8.0f,
+                    "Game Tick: {}", g_state.ticks);
+        }
 
         update(dt);
         render();

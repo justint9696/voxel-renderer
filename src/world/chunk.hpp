@@ -19,6 +19,7 @@ public:
     float avg_mesh = 0.0f;
     time_t mesh_time[MESH_TIME_MAX];
     uint32_t view_distance;
+    size_t nvertices = 0;
 
 public:
     Chunk() = default;
