@@ -47,7 +47,7 @@ void Font::create(const std::string_view& text, glm::vec2 pos, float scale) {
 
         for (size_t i = 0; i < 4; i++) {
             const auto& vertex = FONT_VERTICES[i];
-            this->vertices.push_back(pos + glm::vec2(
+            this->vertices.emplace_back(pos + glm::vec2(
                 (vertex.x < 1.0f) ? vertex.x : vertex.x + scale,
                 (vertex.y < 1.0f) ? vertex.y : vertex.y + scale
             ));
@@ -94,7 +94,7 @@ void Font::render(const Camera& camera) {
 
     nbytes += sizeof(glm::vec2) * this->vertices.size();
     nbytes += sizeof(glm::vec2) * this->uvs.size();
-    glBufferData(GL_ARRAY_BUFFER, nbytes, nullptr, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, nbytes, nullptr, GL_STREAM_DRAW);
 
     size = this->vertices.size() * sizeof(glm::vec2);
     glBufferSubData(GL_ARRAY_BUFFER, offset, size, this->vertices.data());
@@ -113,7 +113,7 @@ void Font::render(const Camera& camera) {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,
                  this->indices.size() * sizeof(uint32_t),
                  this->indices.data(),
-                 GL_STATIC_DRAW);
+                 GL_STREAM_DRAW);
 
     glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0);
 
