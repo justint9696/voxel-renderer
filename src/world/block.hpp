@@ -17,6 +17,7 @@ enum class BlockType {
     Dirt,
     Stone,
     Water,
+    Sand,
 };
 
 enum class BlockTexture {
@@ -24,6 +25,7 @@ enum class BlockTexture {
     Grass1,
     Dirt0,
     Stone0,
+    Sand0,
     Water0 = 16,
 };
 

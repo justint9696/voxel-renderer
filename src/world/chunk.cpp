@@ -252,6 +252,8 @@ void Chunk::generate(ChunkSection& section, glm::vec3 position) {
                     } else {
                         section.blocks.emplace_back(BlockType::Air);
                     }
+                } else if (y < CHUNK_WATER_HEIGHT + 3) {
+                    section.blocks.emplace_back(BlockType::Sand);
                 } else if (y == params.height - 1) {
                     section.blocks.emplace_back(BlockType::Grass);
                 } else if (y >= params.height - 3) {
