@@ -44,7 +44,7 @@ public:
         this->projection = glm::perspective(
                 glm::radians(fov),
                 viewport.x / viewport.y,
-                0.1f, 100.0f);
+                0.1f, 512.0f);
     }
 };
 

@@ -25,7 +25,7 @@ public:
     Chunk() = default;
     ~Chunk() = default;
 
-    Chunk(glm::vec3 position, uint32_t view_distance = 2);
+    Chunk(glm::vec3 position, uint32_t view_distance = 5);
 
     void tick(float dt);
     void update(float dt);

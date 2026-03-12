@@ -6,8 +6,8 @@
 
 #include <cmath>
 
-Chunk::Chunk(glm::vec3 position, uint32_t view_distance) :
-        position(position), view_distance(view_distance) {
+Chunk::Chunk(glm::vec3 position, uint32_t view_distance)
+        : view_distance(view_distance), position(position) {
     glm::vec3 pos;
     size_t nchunks = (view_distance * 2) + 1;
 
@@ -15,8 +15,8 @@ Chunk::Chunk(glm::vec3 position, uint32_t view_distance) :
     this->sections.reserve(std::pow(nchunks, 2));
 
     lg::info("Creating {} chunk sections", std::pow(nchunks, 2));
-    for (int32_t x = 0; x < nchunks; x++) {
-        for (int32_t z = 0; z < nchunks; z++) {
+    for (size_t x = 0; x < nchunks; x++) {
+        for (size_t z = 0; z < nchunks; z++) {
             pos = this->position +
                   glm::vec3(x * CHUNK_WIDTH, 0.0f, z * CHUNK_DEPTH);
             auto& section = this->sections.emplace_back(pos);

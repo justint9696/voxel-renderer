@@ -1,8 +1,12 @@
 -std=c++20
+-Wall
+-Wextra
+-Werror
+-Wno-unused-parameter
 
 -Isrc
 -Ilib/glad/include
--Ilib/glfw/include
--Ilib/glm
--Ilib/stb
--Ilib/noise
+-Ibuild/_deps/glfw-src/include
+-Ibuild/_deps/glm-src
+-Ibuild/_deps/noise-src
+-Ibuild/_deps/stb-src

@@ -48,7 +48,7 @@ int32_t ChunkSection::index_from_position(glm::vec3 position) {
            (position.y) +
            (position.z * CHUNK_HEIGHT));
 
-    if (idx >= CHUNK_VOLUME || idx < 0)
+    if (static_cast<uint32_t>(idx) >= CHUNK_VOLUME || idx < 0)
         return -1;
 
     return idx;

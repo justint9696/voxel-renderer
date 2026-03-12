@@ -13,11 +13,11 @@ constexpr glm::ivec2 SCREEN_SIZE = { 1280, 720 };
 struct State {
     bool wireframe = false;
     bool debug = false;
-    time_t now;
-    time_t last_second = 0;
-    time_t last_tick = 0;
-    time_t last_frame = 0;
-    time_t ticks = 0;
+    uint64_t now;
+    uint64_t last_second = 0;
+    uint64_t last_tick = 0;
+    uint64_t last_frame = 0;
+    uint64_t ticks = 0;
     uint32_t fps = 0;
     uint32_t tps = 0;
     World world;
