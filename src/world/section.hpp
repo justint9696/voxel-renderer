@@ -21,12 +21,14 @@ struct ChunkParams {
 
 class ChunkSection {
 public:
+    uint32_t idx = 0;
     uint32_t flags = 0;
     glm::vec3 position;
     glm::vec3 regen_position;
     ChunkMesh solid;
     ChunkMesh transparent;
     std::vector<BlockType> blocks;
+    std::vector<uint32_t> indices;
 
 public:
     ChunkSection() = default;

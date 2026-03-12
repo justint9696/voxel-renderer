@@ -9,7 +9,7 @@
 #include <queue>
 #include <vector>
 
-constexpr uint32_t MESH_PER_FRAME = 1;
+constexpr uint32_t MESH_PER_FRAME = 2;
 constexpr uint32_t MESH_TIME_MAX = 50;
 
 class Chunk {
@@ -25,7 +25,7 @@ public:
     Chunk() = default;
     ~Chunk() = default;
 
-    Chunk(glm::vec3 position, uint32_t view_distance = 5);
+    Chunk(glm::vec3 position, uint32_t view_distance = 8);
 
     void tick(float dt);
     void update(float dt);
@@ -50,6 +50,7 @@ public:
 
 private:
     std::vector<ChunkSection> sections;
+    std::vector<uint32_t> indices;
 
     // The bottom-left corner coordinates of the chunk
     glm::vec3 position;
@@ -58,9 +59,9 @@ private:
     siv::PerlinNoise perlin;
 
     // Chunk section queue
-    std::deque<ChunkSection *> queue;
+    std::deque<uint32_t> queue;
 
-    bool sort;
+    bool sort = true;
     uint32_t mesh_count;
 
 private:

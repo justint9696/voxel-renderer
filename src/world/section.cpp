@@ -12,6 +12,7 @@ ChunkSection::ChunkSection(glm::vec3 position) :
     this->solid.init();
     this->transparent.init();
     this->blocks.reserve(CHUNK_VOLUME);
+    this->blocks.reserve(CHUNK_VOLUME);
 }
 
 void ChunkSection::render(void) {

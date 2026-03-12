@@ -10,17 +10,21 @@ Chunk::Chunk(glm::vec3 position, uint32_t view_distance)
         : view_distance(view_distance), position(position) {
     glm::vec3 pos;
     size_t nchunks = (view_distance * 2) + 1;
+    size_t squared = std::pow(nchunks, 2);
 
     this->perlin.reseed(util::time::now());
-    this->sections.reserve(std::pow(nchunks, 2));
+    this->sections.reserve(squared);
+    this->indices.resize(squared);
 
-    lg::info("Creating {} chunk sections", std::pow(nchunks, 2));
-    for (size_t x = 0; x < nchunks; x++) {
-        for (size_t z = 0; z < nchunks; z++) {
+    lg::info("Creating {} chunk sections", squared);
+    for (size_t x = 0, idx = 0; x < nchunks; x++) {
+        for (size_t z = 0; z < nchunks; z++, idx++) {
             pos = this->position +
                   glm::vec3(x * CHUNK_WIDTH, 0.0f, z * CHUNK_DEPTH);
             auto& section = this->sections.emplace_back(pos);
+            section.idx = idx;
             this->generate(section, pos);
+            this->indices[idx] = idx;
         }
     }
 
@@ -37,19 +41,19 @@ void Chunk::update(float dt) {
 }
 
 void Chunk::tick(float dt) {
-    ChunkSection *section = nullptr;
     while (!this->queue.empty()) {
         if (this->mesh_count++ >= MESH_PER_FRAME)
             break;
 
-        ASSERT((section = this->queue.front()));
+        auto idx = this->queue.front();
+        auto& section = this->sections.at(idx);
         this->queue.pop_front();
 
-        if (section->flags & CHUNK_REGEN) {
-            this->regenerate(*section);
-        } else if (section->flags & CHUNK_DIRTY) {
-            section->regen_position = section->position;
-            this->prepare_mesh(*section);
+        if (section.flags & CHUNK_REGEN) {
+            this->regenerate(section);
+        } else if (section.flags & CHUNK_DIRTY) {
+            section.regen_position = section.position;
+            this->prepare_mesh(section);
         }
     }
 
@@ -69,21 +73,19 @@ void Chunk::render(const Camera& cam) {
     shader.set<glm::mat4>("u_projection", cam.projection);
     shader.set<glm::vec4>("u_color", glm::vec4(1.0f));
 
-    if (cam.position != cam.prev_position) {
-        this->sort = true;
-    }
-
-    if (this->queue.empty() && this->sort) {
-        std::sort(this->sections.begin(), this->sections.end(),
-                [&cam](const ChunkSection& a, const ChunkSection& b) {
+    if (this->sort) {
+        std::sort(this->indices.begin(), this->indices.end(),
+                [&cam, this](const uint32_t& lval, const uint32_t& rval) {
+                    const auto& a = this->sections.at(lval);
+                    const auto& b = this->sections.at(rval);
                     return glm::distance(cam.position, a.center()) >
                            glm::distance(cam.position, b.center());
                 });
         this->sort = false;
     }
 
-    for (auto& section : this->sections) {
-        section.render();
+    for (const auto& idx : this->indices) {
+        this->sections.at(idx).render();
     }
 }
 
@@ -144,18 +146,21 @@ void Chunk::swap(glm::vec3 position) {
             section.position.z >= max.z) {
             ASSERT((other = this->section_from_position(section.position + vdir)));
             other->flags |= CHUNK_DIRTY;
-            this->queue.push_back(other);
+            this->queue.push_back(other->idx);
 
             section.regen_position = section.position;
             section.position += (vdir * dist);
             section.flags |= CHUNK_REGEN;
-            this->queue.push_front(&section);
+            this->queue.push_front(section.idx);
 
             ASSERT((other = this->section_from_position(section.position - vdir)));
             other->flags |= CHUNK_DIRTY;
-            this->queue.push_back(other);
+            this->queue.push_back(other->idx);
         }
     }
+
+    // notify the renderer to sort the chunks
+    this->sort = true;
 }
 
 void Chunk::prepare_mesh(ChunkSection& section) {
@@ -178,7 +183,7 @@ void Chunk::prepare_mesh(ChunkSection& section) {
     start = util::time::now();
 
     ASSERT(section.blocks.size() > 0);
-    for (size_t i = 0; i < CHUNK_VOLUME; i++) {
+    for (const auto& i : section.indices) {
         const auto& type = section.blocks.at(i);
         if (type == BlockType::Air)
             continue;
@@ -252,13 +257,15 @@ ChunkSection *Chunk::section_from_position(glm::vec3 position) {
 void Chunk::generate(ChunkSection& section, glm::vec3 position) {
     lg::trace("Generating chunk at ({}, {}, {})",
               position.x, position.y, position.z);
+    size_t idx = 0;
     ChunkParams params;
 
     section.blocks.clear();
+    section.indices.clear();
     for (size_t x = 0; x < CHUNK_WIDTH; x++) {
         for (size_t z = 0; z < CHUNK_DEPTH; z++) {
             this->params_at(params, position.x + x, position.z + z);
-            for (size_t y = 0; y < CHUNK_HEIGHT; y++) {
+            for (size_t y = 0; y < CHUNK_HEIGHT; y++, idx++) {
                 if (y >= params.height) {
                     if (y < CHUNK_WATER_HEIGHT) {
                         section.blocks.emplace_back(BlockType::Water);
@@ -274,6 +281,16 @@ void Chunk::generate(ChunkSection& section, glm::vec3 position) {
                 } else {
                     section.blocks.emplace_back(BlockType::Stone);
                 }
+
+                const auto& block = section.blocks.at(idx);
+                switch (block) {
+                    case BlockType::Air:
+                        // no need to mesh blocks of air!
+                        break;
+                    default:
+                        section.indices.emplace_back(idx);
+                        break;
+                }
             }
         }
     }
@@ -287,7 +304,7 @@ void Chunk::regenerate(ChunkSection& section) {
     section.flags &= ~CHUNK_REGEN;
     section.flags |= CHUNK_DIRTY;
 
-    this->queue.push_back(&section);
+    this->queue.push_back(section.idx);
 }
 
 void Chunk::params_at(ChunkParams& params, float x, float z) {
