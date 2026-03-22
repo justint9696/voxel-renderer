@@ -5,15 +5,16 @@
 
 #include <glm/vec4.hpp>
 
-constexpr uint32_t CHUNK_DIRTY = (1 << 0);
-constexpr uint32_t CHUNK_REGEN = (1 << 1);
+constexpr uint32_t CHUNK_DIRTY = (1ULL << 0);
+constexpr uint32_t CHUNK_REGEN = (1ULL << 1);
 
 constexpr uint32_t CHUNK_WIDTH = 16;
 constexpr uint32_t CHUNK_HEIGHT = 256;
 constexpr uint32_t CHUNK_DEPTH = 16;
 constexpr uint32_t CHUNK_VOLUME = (CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_DEPTH);
 
-constexpr uint32_t CHUNK_WATER_HEIGHT = static_cast<uint32_t>(CHUNK_HEIGHT / 2.0f);
+constexpr uint32_t CHUNK_WATER_HEIGHT =
+    static_cast<uint32_t>(CHUNK_HEIGHT / 2.0f);
 
 struct ChunkParams {
     uint32_t height;
@@ -35,8 +36,6 @@ public:
     ~ChunkSection() = default;
 
     ChunkSection(glm::vec3 position);
-
-    void render(void);
 
     // Determines the position of a block from a given index
     glm::vec3 position_from_index(uint32_t idx);

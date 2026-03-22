@@ -1,6 +1,5 @@
 #include "world/chunk.hpp"
 
-#include "renderer/renderer.hpp"
 #include "logger.hpp"
 #include "time.hpp"
 
@@ -29,64 +28,14 @@ Chunk::Chunk(glm::vec3 position, uint32_t view_distance)
     }
 
     for (auto& section : this->sections) {
-        this->prepare_mesh(section);
+        section.flags |= CHUNK_DIRTY;
+        this->queue.push_back(section.idx);
     }
+
+    this->flags |= CHUNK_SORT;
 
     lg::info("Chunk spawned at ({}, {}, {})",
              this->position.x, this->position.y, this->position.z);
-}
-
-void Chunk::update(float dt) {
-    this->mesh_count = 0;
-}
-
-void Chunk::tick(float dt) {
-    while (!this->queue.empty()) {
-        if (this->mesh_count++ >= MESH_PER_FRAME)
-            break;
-
-        auto idx = this->queue.front();
-        auto& section = this->sections.at(idx);
-        this->queue.pop_front();
-
-        if (section.flags & CHUNK_REGEN) {
-            this->regenerate(section);
-        } else if (section.flags & CHUNK_DIRTY) {
-            section.regen_position = section.position;
-            this->prepare_mesh(section);
-        }
-    }
-
-    for (size_t i = 0; i < MESH_TIME_MAX; i++)
-        this->avg_mesh += this->mesh_time[i];
-
-    this->avg_mesh = (this->avg_mesh / MESH_TIME_MAX) * 1e-6;
-}
-
-void Chunk::render(const Camera& cam) {
-    auto& shader = renderer::shader::get("default");
-    shader.use();
-
-    renderer::texture::bind("atlas");
-
-    shader.set<glm::mat4>("u_view", cam.view);
-    shader.set<glm::mat4>("u_projection", cam.projection);
-    shader.set<glm::vec4>("u_color", glm::vec4(1.0f));
-
-    if (this->sort) {
-        std::sort(this->indices.begin(), this->indices.end(),
-                [&cam, this](const uint32_t& lval, const uint32_t& rval) {
-                    const auto& a = this->sections.at(lval);
-                    const auto& b = this->sections.at(rval);
-                    return glm::distance(cam.position, a.center()) >
-                           glm::distance(cam.position, b.center());
-                });
-        this->sort = false;
-    }
-
-    for (const auto& idx : this->indices) {
-        this->sections.at(idx).render();
-    }
 }
 
 glm::vec3 Chunk::center(void) const {
@@ -160,98 +109,19 @@ void Chunk::swap(glm::vec3 position) {
     }
 
     // notify the renderer to sort the chunks
-    this->sort = true;
-}
-
-void Chunk::prepare_mesh(ChunkSection& section) {
-    uint32_t idx = 0;
-    size_t n = 0;
-    glm::vec3 position;
-    glm::vec3 normal;
-    glm::vec4 uv;
-    time_t start;
-    time_t end;
-
-    // destroy the previous meshes
-    this->vram -= section.solid.vram + section.transparent.vram;
-    this->nvertices -=
-        section.solid.vertices.size() + section.transparent.vertices.size();
-
-    section.solid.clear();
-    section.transparent.clear();
-
-    start = util::time::now();
-
-    ASSERT(section.blocks.size() > 0);
-    for (const auto& i : section.indices) {
-        const auto& type = section.blocks.at(i);
-        if (type == BlockType::Air)
-            continue;
-
-        idx = static_cast<uint32_t>(type) - 1;
-        const auto& block = BLOCK_TABLE[idx];
-        position = section.position_from_index(i);
-
-        // only mesh the topmost water block in bodies of water
-        if (type == BlockType::Water && position.y < CHUNK_WATER_HEIGHT - 1)
-            continue;
-
-        auto& mesh = ((block.flags & BLOCK_TRANSPARENT) ?
-                       section.transparent : section.solid);
-
-        for (size_t j = 0; j < BLOCK_FACES; j++) {
-            normal = BLOCK_NORMALS[j];
-
-            // only mesh the top face of water blocks
-            if (type == BlockType::Water && normal.y < 1.0f)
-                continue;
-
-            if (!section.is_visible(position, normal))
-                continue;
-
-            auto other = this->section_from_position(position + normal);
-            if (other && !other->is_visible(position, normal))
-                continue;
-
-            if (fabs(normal.y) < 1.0f)
-                uv = renderer::texture::uv_coords(
-                        "atlas", static_cast<uint32_t>(block.front));
-            else
-                uv = renderer::texture::uv_coords(
-                        "atlas", static_cast<uint32_t>(block.top));
-
-            section.mesh_block_face(mesh, position - section.position, normal,
-                                    uv, block.opacity, j, n++);
-        }
-    }
-
-    section.solid.allocate(false);
-    section.solid.submit();
-
-    section.transparent.allocate(true);
-    section.transparent.submit();
-
-    section.flags &= ~CHUNK_DIRTY;
-
-    this->vram += section.solid.vram + section.transparent.vram;
-    this->nvertices += 
-        section.solid.vertices.size() + section.transparent.vertices.size();
-
-    end = util::time::now();
-    this->mesh_time[this->mesh_idx] = (end - start);
-    this->mesh_idx = ((this->mesh_idx + 1) % MESH_TIME_MAX);
+    this->flags |= CHUNK_SORT;
 }
 
 ChunkSection *Chunk::section_from_position(glm::vec3 position) {
-    ChunkSection *section = nullptr;
-    for (auto& tmp : this->sections) {
-        if (tmp.contains(position)) {
-            section = &tmp;
+    ChunkSection *ret = nullptr;
+    for (auto& section : this->sections) {
+        if (section.contains(position)) {
+            ret = &section;
             break;
         }
     }
 
-    return section;
+    return ret;
 }
 
 void Chunk::generate(ChunkSection& section, glm::vec3 position) {
@@ -311,4 +181,16 @@ void Chunk::params_at(ChunkParams& params, float x, float z) {
     float height =
         CHUNK_HEIGHT * this->perlin.octave2D_01(x * 0.01f, z * 0.01f, 3);
     params.height = ceilf(fmaxf(fminf(height, CHUNK_HEIGHT), 1));
+}
+
+void Chunk::sort(const Camera& camera) {
+    std::sort(
+        this->indices.begin(), this->indices.end(),
+        [&camera, this](const uint32_t& lval, const uint32_t& rval) {
+            const auto& a = this->sections.at(lval);
+            const auto& b = this->sections.at(rval);
+            return glm::distance(camera.position, a.center()) >
+                   glm::distance(camera.position, b.center());
+        });
+    this->flags &= ~CHUNK_SORT;
 }

@@ -1,27 +1,17 @@
 #include "world/section.hpp"
-
-#include "renderer/renderer.hpp"
 #include "logger.hpp"
 
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 #include <cmath>
 
-ChunkSection::ChunkSection(glm::vec3 position) :
-        position(position), regen_position(position) {
+ChunkSection::ChunkSection(glm::vec3 position)
+        : position(position)
+        , regen_position(position) {
     this->solid.init();
     this->transparent.init();
     this->blocks.reserve(CHUNK_VOLUME);
     this->blocks.reserve(CHUNK_VOLUME);
-}
-
-void ChunkSection::render(void) {
-    auto& shader = renderer::shader::get("default");
-    auto model = glm::translate(glm::mat4(1.0f), this->regen_position);
-    shader.set<glm::mat4>("u_model", model);
-
-    this->solid.render();
-    this->transparent.render();
 }
 
 glm::vec3 ChunkSection::position_from_index(uint32_t idx) {

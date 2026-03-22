@@ -3,6 +3,9 @@
 #include <glm/common.hpp>
 #include <glm/ext.hpp>
 
+constexpr float CAMERA_SPEED = 35.0f;
+constexpr float CAMERA_SENSITIVITY = 3.0f;
+
 class Camera {
 public:
     glm::mat4 view;
@@ -19,11 +22,7 @@ public:
 
     void update_view_matrix();
 
-    const glm::ivec2& get_viewport() const {
-        return this->viewport;
-    }
-
-protected:
+public:
     float fov;
     float yaw = -90.0f;
     float pitch = 0.0f;
@@ -38,8 +37,8 @@ public:
     PerspectiveCamera() = default;
     ~PerspectiveCamera() = default;
 
-    PerspectiveCamera(glm::vec3 position, float fov, glm::vec2 viewport) :
-            Camera(position, fov, viewport) {
+    PerspectiveCamera(glm::vec3 position, float fov, glm::vec2 viewport)
+            : Camera(position, fov, viewport) {
         this->projection = glm::perspective(
                 glm::radians(fov),
                 viewport.x / viewport.y,
@@ -52,9 +51,11 @@ public:
     OrthoCamera() = default;
     ~OrthoCamera() = default;
 
-    OrthoCamera(glm::vec2 viewport) :
-            Camera(glm::vec3(0.0f), 90.0f, viewport) {
-        this->projection = glm::ortho(0.0f, viewport.x, 0.0f, viewport.y,
-                                      -100.0f, 100.0f);
+    OrthoCamera(glm::vec2 viewport)
+            : Camera(glm::vec3(0.0f), 90.0f, viewport) {
+        this->projection = glm::ortho(
+                0.0f, viewport.x,
+                0.0f, viewport.y,
+                -100.0f, 100.0f);
     }
 };

@@ -13,9 +13,7 @@ public:
     World() = default;
     ~World() = default;
 
-    World(glm::vec3 pos);
+    World(glm::vec3 pos, glm::ivec2 viewport);
 
-    void update(float dt);
     void tick(float dt);
-    void render(void);
 };

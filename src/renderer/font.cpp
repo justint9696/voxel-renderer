@@ -15,10 +15,8 @@ extern const glm::vec2 FONT_VERTICES[];
 extern const glm::vec2 FONT_UVS[];
 extern const uint32_t FONT_INDICES[];
 
-Font::Font(const std::string& frag_path, const std::string& vert_path,
-           const std::string& tex_path, glm::ivec2 size) :
-        shader(frag_path, vert_path),
-        texture(tex_path, size) {
+Font::Font(Shader& shader, Texture& texture)
+    : shader(shader), texture(texture) {
     glGenVertexArrays(1, &this->vao);
     glGenBuffers(1, &this->vbo);
     glGenBuffers(1, &this->ibo);
@@ -82,7 +80,7 @@ void Font::render(const Camera& camera) {
     this->shader.set<glm::mat4>("u_projection", camera.projection);
 
     const float scale = 2.0f;
-    const auto& viewport = camera.get_viewport();
+    const auto& viewport = camera.viewport;
     auto model = glm::translate(glm::mat4(1.0f),
                                 glm::vec3(0.0f, viewport.y, 0.0f));
     model = glm::scale(model, glm::vec3(scale, scale, 0.0f));
