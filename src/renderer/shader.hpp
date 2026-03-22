@@ -22,7 +22,7 @@ public:
     void set(std::string_view name, Tp value);
 
 private:
-    uint32_t handle;
+    uint32_t handle = 0;
 
 private:
     uint32_t create(GLenum type, std::string_view fname);

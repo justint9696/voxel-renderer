@@ -12,19 +12,19 @@ void ChunkMesh::init() {
     glBindBuffer(GL_ARRAY_BUFFER, this->vbo);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(ChunkVertex),
-                          (void *)offsetof(ChunkVertex, position));
+                          reinterpret_cast<void *>(offsetof(ChunkVertex, position)));
     glEnableVertexAttribArray(0);
 
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(ChunkVertex),
-                          (void *)offsetof(ChunkVertex, uv));
+                          reinterpret_cast<void *>(offsetof(ChunkVertex, uv)));
     glEnableVertexAttribArray(1);
 
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(ChunkVertex),
-                          (void *)offsetof(ChunkVertex, normal));
+                          reinterpret_cast<void *>(offsetof(ChunkVertex, normal)));
     glEnableVertexAttribArray(2);
 
     glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(ChunkVertex),
-                          (void *)offsetof(ChunkVertex, opacity));
+                          reinterpret_cast<void *>(offsetof(ChunkVertex, opacity)));
     glEnableVertexAttribArray(3);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);

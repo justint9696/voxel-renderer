@@ -97,14 +97,14 @@ void Font::render(const Camera& camera) {
     size = this->vertices.size() * sizeof(glm::vec2);
     glBufferSubData(GL_ARRAY_BUFFER, offset, size, this->vertices.data());
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2),
-                          (void *)offset);
+                          reinterpret_cast<void *>(offset));
     glEnableVertexAttribArray(0);
 
     offset += size;
     size = this->uvs.size() * sizeof(glm::vec2);
     glBufferSubData(GL_ARRAY_BUFFER, offset, size, this->uvs.data());
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2),
-                          (void *)offset);
+                          reinterpret_cast<void *>(offset));
     glEnableVertexAttribArray(1);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->ibo);

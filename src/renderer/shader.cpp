@@ -2,12 +2,10 @@
 #include "logger.hpp"
 
 #include <glm/glm.hpp>
-#include <fstream>
-#include <sstream>
+
+#include <cstring>
 
 Shader::Shader(std::string_view frag_path, std::string_view vert_path) {
-    char info_buf[512];
-    int32_t success;
     uint32_t vert_shader = this->create(GL_VERTEX_SHADER, vert_path);
     uint32_t frag_shader = this->create(GL_FRAGMENT_SHADER, frag_path);
 
@@ -16,10 +14,12 @@ Shader::Shader(std::string_view frag_path, std::string_view vert_path) {
     glAttachShader(this->handle, frag_shader);
     glLinkProgram(this->handle);
 
+    int32_t success;
     glGetProgramiv(this->handle, GL_LINK_STATUS, &success);
     if (!success) {
-        glGetShaderInfoLog(this->handle, 512, NULL, info_buf);
-        lg::fatal("Failed to shaders: \n{}", info_buf);
+        char error_buf[512];
+        glGetShaderInfoLog(this->handle, sizeof(error_buf), nullptr, error_buf);
+        lg::fatal("Failed to link shaders: \n{}", error_buf);
     }
 
     glDeleteShader(frag_shader);
@@ -27,37 +27,46 @@ Shader::Shader(std::string_view frag_path, std::string_view vert_path) {
 }
 
 uint32_t Shader::create(GLenum type, std::string_view fname) {
-    std::stringstream sstream;
-    std::ifstream fstream(fname.data());
-    std::string src;
-    uint32_t shader;
-    int32_t success;
-    char info_buf[1024];
-    const char *cp;
-
-    if (!fstream.is_open()) {
-        lg::fatal("Failed to open file: {}", fname);
+    FILE *fp;
+    if (!(fp = fopen(fname.data(), "rb"))) {
+        lg::fatal("Failed to open {}", fname);
     }
 
-    sstream << fstream.rdbuf();
+    size_t size;
+    (void)fseek(fp, 0, SEEK_END);
 
-    if (sstream.str().empty()) {
+    if ((size = ftell(fp)) == 0) {
         lg::fatal("Shader is empty: {}", fname);
     }
 
-    src = sstream.str();
-    cp = src.data();
+    (void)fseek(fp, 0, SEEK_SET);
 
-    shader = glCreateShader(type);
-    glShaderSource(shader, 1, &cp, NULL);
-    glCompileShader(shader);
+    char *text;
+    ASSERT((text = new char[size]));
 
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(shader, 512, NULL, info_buf);
-        lg::fatal("Failed to compile shader: {}\n{}", fname, info_buf);
+    if (!fread(text, size, 1, fp)) {
+        lg::fatal("Failed to read file: {}: {}", fname, strerror(errno));
     }
 
+    ASSERT(strnlen(text, sizeof(text)) > 0);
+
+    uint32_t shader = glCreateShader(type);
+    glShaderSource(shader, 1, (const GLchar *const *)&text, (const GLint *)&size);
+    glCompileShader(shader);
+
+    int32_t success;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        char error_buf[1024];
+        glGetShaderInfoLog(shader, sizeof(error_buf), nullptr, error_buf);
+        lg::fatal("Failed to compile shader: \n{}", error_buf);
+    }
+
+    ASSERT(fp);
+    ASSERT(!fclose(fp));
+    ASSERT(text);
+
+    delete[] text;
     return shader;
 }
 
