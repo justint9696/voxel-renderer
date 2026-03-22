@@ -33,9 +33,6 @@ void Game::run() {
     this->window.clear_color(0.52f, 0.81f, 0.92f, 1.0f);
 
     while (true) {
-        if (this->window.input.key_pressed(GLFW_KEY_Q))
-            break;
-
         if (this->window.should_close())
             break;
 
@@ -72,9 +69,23 @@ void Game::run() {
 void Game::update(float dt) {}
 
 void Game::tick(float dt) {
+    if (this->window.input.key_pressed(GLFW_KEY_Q)) {
+        this->window.close();
+    }
+    if (this->window.input.key_pressed(GLFW_KEY_F12)) {
+        this->flags ^= GAME_DEBUG;
+    } 
+
+    if (this->window.input.key_pressed(GLFW_KEY_T)) {
+        this->flags ^= GAME_WIREFRAME;
+        glPolygonMode(GL_FRONT_AND_BACK,
+                ((this->flags & GAME_WIREFRAME) ? GL_LINE : GL_FILL));
+    }
+
     this->world.tick(dt);
     this->player.tick(this->window.input, this->world.camera, dt);
     this->window.input.mouse_reset();
+    this->window.input.tick();
 
     if (auto renderer = this->renderer.get()) {
         renderer->prepare();

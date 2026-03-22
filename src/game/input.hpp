@@ -9,14 +9,11 @@
 #include <ctime>
 
 enum class KeyState {
-    Up,
-    Down
+    Up, Down, Held
 };
 
 struct Key {
     KeyState state = KeyState::Up;
-    time_t pressed_tick = 0;
-    time_t released_tick = 0;
 };
 
 struct Mouse {
@@ -26,6 +23,7 @@ struct Mouse {
 
 class Input {
 public:
+    void tick();
     void update_key(GLFWwindow *window, int key, int action);
     bool key_pressed(int key) const;
     bool key_held(int key, time_t delay = 0) const;

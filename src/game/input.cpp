@@ -1,20 +1,25 @@
 #include "game/input.hpp"
-#include "time.hpp"
 
-constexpr time_t KEY_HOLD_MS = 125;
-constexpr time_t KEY_HOLD_NS = (KEY_HOLD_MS * 1e+6);
+void Input::tick() {
+    for (auto& key : this->keys) {
+        switch (key.state) {
+            case KeyState::Down:
+                key.state = KeyState::Held;
+                break;
+            default:
+                break;
+        }
+    }
+}
 
 void Input::update_key(GLFWwindow *window, int key, int action) {
     auto& k = this->keys.at(key);
-    auto tick = util::time::now();
     switch (action) {
         case GLFW_PRESS:
             k.state = KeyState::Down;
-            k.pressed_tick = tick;
             break;
         case GLFW_RELEASE:
             k.state = KeyState::Up;
-            k.released_tick = tick;
             break;
         default:
             break;
@@ -22,22 +27,20 @@ void Input::update_key(GLFWwindow *window, int key, int action) {
 }
 
 bool Input::key_pressed(int key) const {
-    auto tick = util::time::now();
     const auto& k = this->keys.at(key);
     switch (k.state) {
         case KeyState::Down:
-            return (tick - k.pressed_tick) < KEY_HOLD_NS;
+            return true;
         default:
             return false;
     }
 }
 
 bool Input::key_held(int key, time_t delay) const {
-    auto tick = util::time::now();
     const auto& k = this->keys.at(key);
     switch (k.state) {
-        case KeyState::Down:
-            return (tick - k.pressed_tick) > delay;
+        case KeyState::Held:
+            return true;
         default:
             return false;
     }
