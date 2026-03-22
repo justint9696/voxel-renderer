@@ -2,14 +2,14 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <string>
+#include <string_view>
 
 class Shader {
 public:
     Shader() = default;
     ~Shader() = default;
 
-    Shader(const std::string& frag_path, const std::string& vert_path);
+    Shader(std::string_view frag_path, std::string_view vert_path);
 
     inline void use() const {
         if (this->handle) {
@@ -19,11 +19,11 @@ public:
 
     // Sets a shader uniform by type
     template <typename Tp>
-    void set(const std::string& name, Tp value);
+    void set(std::string_view name, Tp value);
 
 private:
     uint32_t handle;
 
 private:
-    uint32_t create(GLenum type, const std::string& fname);
+    uint32_t create(GLenum type, std::string_view fname);
 };

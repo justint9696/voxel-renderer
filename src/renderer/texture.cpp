@@ -6,12 +6,12 @@
 
 #include <glm/common.hpp>
 
-Texture::Texture(const std::string& fname, glm::ivec2 size) : size(size) {
+Texture::Texture(std::string_view fname, glm::ivec2 size) : size(size) {
     int width, height, channels;
     uint8_t *data = nullptr;
 
     stbi_set_flip_vertically_on_load(true);
-    data = stbi_load(fname.c_str(), &width, &height, &channels, 0); 
+    data = stbi_load(fname.data(), &width, &height, &channels, 0); 
     if (!data) {
         lg::fatal("Failed to load image: {}", fname);
     }

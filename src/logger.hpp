@@ -22,7 +22,7 @@ namespace lg {
         Fatal
     };
 
-    void set_file(const std::string& fname, bool append = false);
+    void set_file(std::string_view fname, bool append = false);
     void set_file_level(LogLevel level);
     void set_stdout_level(LogLevel level);
 

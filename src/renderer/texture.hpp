@@ -5,14 +5,14 @@
 
 #include <glm/vec2.hpp>
 #include <glm/vec4.hpp>
-#include <string>
+#include <string_view>
 
 class Texture {
 public:
     Texture() = default;
     ~Texture() = default;
 
-    Texture(const std::string& fname, glm::ivec2 size);
+    Texture(std::string_view fname, glm::ivec2 size);
 
     inline void bind() const {
         glBindTexture(GL_TEXTURE_2D, this->handle);

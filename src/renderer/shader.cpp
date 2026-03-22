@@ -5,7 +5,7 @@
 #include <fstream>
 #include <sstream>
 
-Shader::Shader(const std::string& frag_path, const std::string& vert_path) {
+Shader::Shader(std::string_view frag_path, std::string_view vert_path) {
     char info_buf[512];
     int32_t success;
     uint32_t vert_shader = this->create(GL_VERTEX_SHADER, vert_path);
@@ -26,9 +26,9 @@ Shader::Shader(const std::string& frag_path, const std::string& vert_path) {
     glDeleteShader(vert_shader);
 }
 
-uint32_t Shader::create(GLenum type, const std::string& fname) {
+uint32_t Shader::create(GLenum type, std::string_view fname) {
     std::stringstream sstream;
-    std::ifstream fstream(fname);
+    std::ifstream fstream(fname.data());
     std::string src;
     uint32_t shader;
     int32_t success;
@@ -46,7 +46,7 @@ uint32_t Shader::create(GLenum type, const std::string& fname) {
     }
 
     src = sstream.str();
-    cp = src.c_str();
+    cp = src.data();
 
     shader = glCreateShader(type);
     glShaderSource(shader, 1, &cp, NULL);
@@ -62,24 +62,24 @@ uint32_t Shader::create(GLenum type, const std::string& fname) {
 }
 
 template <>
-void Shader::set(const std::string& name, glm::vec3 value) {
-    glUniform3fv(glGetUniformLocation(this->handle, name.c_str()), 1,
+void Shader::set(std::string_view name, glm::vec3 value) {
+    glUniform3fv(glGetUniformLocation(this->handle, name.data()), 1,
                  (const GLfloat *)&value);
 }
 
 template <>
-void Shader::set(const std::string& name, glm::vec4 value) {
-    glUniform4fv(glGetUniformLocation(this->handle, name.c_str()), 1,
+void Shader::set(std::string_view name, glm::vec4 value) {
+    glUniform4fv(glGetUniformLocation(this->handle, name.data()), 1,
                  (const GLfloat *)&value);
 }
 
 template <>
-void Shader::set(const std::string& name, float value) {
-    glUniform1f(glGetUniformLocation(this->handle, name.c_str()), value);
+void Shader::set(std::string_view name, float value) {
+    glUniform1f(glGetUniformLocation(this->handle, name.data()), value);
 }
 
 template <>
-void Shader::set(const std::string& name, glm::mat4 value) {
-    glUniformMatrix4fv(glGetUniformLocation(this->handle, name.c_str()),
+void Shader::set(std::string_view name, glm::mat4 value) {
+    glUniformMatrix4fv(glGetUniformLocation(this->handle, name.data()),
                        1, GL_FALSE, (const GLfloat *)&value);
 }

@@ -44,13 +44,13 @@ namespace lg {
         }
     }
 
-    void set_file(const std::string& fname, bool append) {
+    void set_file(std::string_view fname, bool append) {
         if (g_logger.fp) {
             fclose(g_logger.fp);
         }
 
         const char *mode = ((append) ? "a+" : "w+");
-        ASSERT((g_logger.fp = fopen(fname.c_str(), mode)));
+        ASSERT((g_logger.fp = fopen(fname.data(), mode)));
     }
 
     void set_file_level(LogLevel level) {
