@@ -10,6 +10,9 @@
 #include <memory>
 #include <unordered_map>
 
+constexpr uint32_t GAME_DEBUG       = (1ULL << 0);
+constexpr uint32_t GAME_WIREFRAME   = (1ULL << 1);
+
 struct Time {
     Time(uint64_t ts) 
         : now(ts)
@@ -37,6 +40,7 @@ private:
     void render();
 
 private:
+    uint32_t flags = 0;
     Time time;
     World world;
     Player player;
